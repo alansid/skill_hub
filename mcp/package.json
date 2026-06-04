@@ -1,0 +1,22 @@
+{
+  "name": "@skill-hub/mcp-server",
+  "version": "0.1.0",
+  "description": "SkillHub MCP Server — let AI discover and install skills",
+  "type": "commonjs",
+  "bin": {
+    "skillhub-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

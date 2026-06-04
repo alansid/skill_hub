@@ -1,0 +1,23 @@
+{
+  "name": "@skill-hub/cli",
+  "version": "0.1.0",
+  "description": "SkillHub CLI — pull skills to local AI tool directory",
+  "type": "commonjs",
+  "bin": {
+    "skillhub": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

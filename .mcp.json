@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "skillhub": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "d:\\test_hub\\mcp\\dist\\index.js"
+      ],
+      "env": {
+        "SKILLHUB_API_URL": "http://localhost:8080"
+      }
+    }
+  }
+}

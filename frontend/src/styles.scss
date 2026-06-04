@@ -1,0 +1,127 @@
+@use '@angular/material' as mat;
+
+// ─── Brand tokens ────────────────────────────────────────────────────────────
+:root {
+  --brand-primary:   #6366f1;   // indigo-500
+  --brand-primary-d: #4f46e5;   // indigo-600 (hover)
+  --brand-accent:    #14b8a6;   // teal-500
+  --brand-bg:        #f5f5ff;   // near-white with slight indigo tint
+  --brand-surface:   #ffffff;
+  --brand-sidebar:   #fafafe;
+  --brand-border:    #e8e8f0;
+  --brand-text:      #1e1b4b;   // indigo-950
+  --brand-muted:     #6b7280;
+}
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary:   mat.$violet-palette,
+        tertiary:  mat.$cyan-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--brand-bg);
+  color: var(--brand-text);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+// ─── Global overrides ─────────────────────────────────────────────────────────
+
+// Toolbar gradient
+.app-toolbar {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #818cf8 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 12px rgba(99,102,241,.35) !important;
+}
+
+// Mat card
+mat-card {
+  border: 1px solid var(--brand-border) !important;
+  border-radius: 12px !important;
+  background: var(--brand-surface) !important;
+
+  &:hover {
+    border-color: var(--brand-primary) !important;
+    box-shadow: 0 4px 20px rgba(99,102,241,.15) !important;
+  }
+}
+
+// Sidenav sidebar
+mat-sidenav {
+  background: var(--brand-sidebar) !important;
+  border-right: 1px solid var(--brand-border) !important;
+}
+
+// Chips
+.mat-mdc-chip {
+  --mdc-chip-label-text-color: var(--brand-primary);
+  --mdc-chip-elevated-container-color: #eef2ff;
+}
+.mat-mdc-chip-option.mat-mdc-chip-selected {
+  --mdc-chip-elevated-selected-container-color: var(--brand-primary) !important;
+  --mdc-chip-selected-label-text-color: #fff !important;
+}
+
+// Tab ink bar → brand color
+.mat-mdc-tab-group .mdc-tab-indicator__content--underline {
+  border-color: var(--brand-primary) !important;
+}
+.mat-mdc-tab .mdc-tab__text-label {
+  color: var(--brand-muted);
+}
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: var(--brand-primary) !important;
+  font-weight: 600;
+}
+
+// Search form field
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--brand-primary) !important;
+}
+.mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: var(--brand-primary) !important;
+}
+
+// Spinner
+.mat-mdc-progress-spinner circle {
+  stroke: var(--brand-primary) !important;
+}
+
+// Paginator
+.mat-mdc-paginator-range-label,
+.mat-mdc-paginator-navigation-next,
+.mat-mdc-paginator-navigation-previous {
+  color: var(--brand-primary) !important;
+}
+
+// Scrollbar hide utility
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+// Remove mat-card-header avatar placeholder spacing
+mat-card-header .mat-mdc-card-header-text {
+  margin: 0 !important;
+}
+.mdc-card { padding: 0 !important; }
+
+// Skill card compact override
+.skill-card .mat-mdc-card-content:last-child { padding-bottom: 0 !important; }
+.skill-card.mdc-card { overflow: hidden !important; }
+
+@import "tailwindcss";
