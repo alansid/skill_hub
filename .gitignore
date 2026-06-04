@@ -26,8 +26,9 @@ frontend/.angular/
 .DS_Store
 Thumbs.db
 
-# Claude Code
-.claude/
+# Claude Code (exclude settings/cache, but keep specs and skills)
+.claude/*
+!.claude/specs/
 .opencode/
 
 # Local config (has secrets)
