@@ -4,6 +4,7 @@ import type { Booking, BookingPatch, ClinicSettings } from '../data/types';
 import { formatGregorian, isValidDate, weekdayName } from '../lib/dates';
 import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
 import { normalizeTime } from '../lib/schedule';
+import { askConfirm } from './askConfirm';
 import { Modal } from './Modal';
 
 export type BookingDialogTarget =
@@ -108,9 +109,13 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
     }
   }
 
-  function cancelBooking() {
+  async function cancelBooking() {
     if (!existing) return;
-    if (!confirm(`確定要取消「${existing.name}」${existing.slot} 的預約嗎？\n（紀錄會保留，標示為已取消）`)) return;
+    const ok = await askConfirm(
+      `確定要取消「${existing.name}」${existing.slot} 的預約嗎？\n（紀錄會保留，標示為已取消）`,
+      '取消預約',
+    );
+    if (!ok) return;
     void run(() => api.updateBooking(existing.id, { status: 'cancelled' }));
   }
 

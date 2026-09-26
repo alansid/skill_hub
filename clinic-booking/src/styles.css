@@ -327,3 +327,8 @@ a.icon-btn { font-size: 1.15rem; }
   .form-row.two { grid-template-columns: 1fr; }
   .result { grid-template-columns: 1fr; }
 }
+
+/* ---------- 確認視窗 ---------- */
+.confirm-backdrop { z-index: 30; }
+.confirm-box { max-width: 380px; padding: 1.25rem; }
+.confirm-text { white-space: pre-line; margin: 0 0 1rem; line-height: 1.7; }

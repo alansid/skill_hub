@@ -3,6 +3,7 @@ import { api } from '../data';
 import type { ClinicSettings, DayOverride } from '../data/types';
 import { formatGregorian, weekdayName } from '../lib/dates';
 import { periodOf, scheduleFor, type Period } from '../lib/schedule';
+import { askConfirm } from './askConfirm';
 import { Modal } from './Modal';
 
 type Mode = 'regular' | 'closed' | 'partial';
@@ -46,7 +47,11 @@ export function DaySettingsDialog({ date, settings, override, activeCount, onClo
       return;
     }
     if (mode === 'closed' && activeCount > 0) {
-      if (!confirm(`這天還有 ${activeCount} 筆預約，設為休診後預約不會自動取消，請記得聯絡病人。確定嗎？`)) return;
+      const ok = await askConfirm(
+        `這天還有 ${activeCount} 筆預約，設為休診後預約不會自動取消，請記得聯絡病人。確定嗎？`,
+        '設為休診',
+      );
+      if (!ok) return;
     }
     setBusy(true);
     setError('');

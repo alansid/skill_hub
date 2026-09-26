@@ -10,6 +10,27 @@ const USER_KEY = 'ren-clinic-demo-user';
 export const DEMO_EMAIL = 'demo@example.com';
 export const DEMO_PASSWORD = 'demo1234';
 
+// 瀏覽器不允許儲存時（例如無痕模式），改存在記憶體裡，重新整理就會清空
+const memory = new Map<string, string>();
+
+function getItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return memory.get(key) ?? null;
+  }
+}
+
+function setItem(key: string, value: string | null) {
+  try {
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
+  } catch {
+    if (value === null) memory.delete(key);
+    else memory.set(key, value);
+  }
+}
+
 export interface Store {
   bookings: Booking[];
   overrides: DayOverride[];
@@ -17,7 +38,7 @@ export interface Store {
 
 export function load(): Store {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = getItem(KEY);
     if (raw) return JSON.parse(raw) as Store;
   } catch {
     // 讀不到就當作空的
@@ -28,7 +49,7 @@ export function load(): Store {
 export const listeners = new Set<() => void>();
 
 export function save(store: Store) {
-  localStorage.setItem(KEY, JSON.stringify(store));
+  setItem(KEY, JSON.stringify(store));
   listeners.forEach((fn) => fn());
 }
 
@@ -51,16 +72,16 @@ export function createDemoApi(): AdminApi {
   return {
     mode: 'demo',
     async currentUser() {
-      return localStorage.getItem(USER_KEY);
+      return getItem(USER_KEY);
     },
     async signIn(email, password) {
       if (email.trim().toLowerCase() !== DEMO_EMAIL || password !== DEMO_PASSWORD) {
         throw new Error('帳號或密碼錯誤');
       }
-      localStorage.setItem(USER_KEY, DEMO_EMAIL);
+      setItem(USER_KEY, DEMO_EMAIL);
     },
     async signOut() {
-      localStorage.removeItem(USER_KEY);
+      setItem(USER_KEY, null);
     },
     async getSettings() {
       return DEFAULT_SETTINGS;

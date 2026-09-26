@@ -6,6 +6,7 @@ import { DEFAULT_SETTINGS } from '../lib/schedule';
 import { DayPage } from './DayPage';
 import { LoginPage } from './LoginPage';
 import { SearchPage } from './SearchPage';
+import { askConfirm, showMessage } from './askConfirm';
 import { exportCsv } from './exportCsv';
 
 type View = 'day' | 'search';
@@ -33,14 +34,14 @@ export function AdminApp() {
     try {
       await exportCsv(await api.exportAll());
     } catch (e) {
-      alert((e as Error).message);
+      void showMessage((e as Error).message);
     } finally {
       setExporting(false);
     }
   }
 
   async function handleLogout() {
-    if (!confirm('確定要登出嗎？')) return;
+    if (!(await askConfirm('確定要登出嗎？', '登出'))) return;
     await api.signOut();
     setUser(null);
   }
