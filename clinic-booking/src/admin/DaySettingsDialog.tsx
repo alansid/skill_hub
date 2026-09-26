@@ -3,7 +3,7 @@ import { api } from '../data';
 import type { ClinicSettings, DayOverride } from '../data/types';
 import { formatGregorian, weekdayName } from '../lib/dates';
 import { periodOf, scheduleFor, type Period } from '../lib/schedule';
-import { askConfirm } from './askConfirm';
+import { askConfirm } from '../lib/askConfirm';
 import { Modal } from './Modal';
 
 type Mode = 'regular' | 'closed' | 'partial';

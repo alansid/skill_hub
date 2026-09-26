@@ -17,10 +17,11 @@ interface BookingRow {
   created_at: string;
   updated_at: string;
   cancelled_at: string | null;
+  cancelled_by: Booking['cancelledBy'];
 }
 
 const BOOKING_COLUMNS =
-  'id,date,slot,actual_time,name,phone,note,status,is_extra,source,created_at,updated_at,cancelled_at';
+  'id,date,slot,actual_time,name,phone,note,status,is_extra,source,created_at,updated_at,cancelled_at,cancelled_by';
 
 function toBooking(r: BookingRow): Booking {
   return {
@@ -37,6 +38,7 @@ function toBooking(r: BookingRow): Booking {
     createdAt: r.created_at,
     updatedAt: r.updated_at,
     cancelledAt: r.cancelled_at,
+    cancelledBy: r.cancelled_by,
   };
 }
 

@@ -113,6 +113,7 @@ export function createDemoApi(): AdminApi {
         createdAt: now,
         updatedAt: now,
         cancelledAt: null,
+        cancelledBy: null,
       };
       if (hasConflict(store, booking)) throw new SlotTakenError();
       store.bookings.push(booking);
@@ -125,8 +126,14 @@ export function createDemoApi(): AdminApi {
       if (!current) throw new Error('找不到這筆預約');
       const now = new Date().toISOString();
       const next: Booking = { ...current, ...patch, updatedAt: now };
-      if (patch.status === 'cancelled' && current.status !== 'cancelled') next.cancelledAt = now;
-      if (patch.status === 'booked') next.cancelledAt = null;
+      if (patch.status === 'cancelled' && current.status !== 'cancelled') {
+        next.cancelledAt = now;
+        next.cancelledBy = 'clinic';
+      }
+      if (patch.status === 'booked') {
+        next.cancelledAt = null;
+        next.cancelledBy = null;
+      }
       if (hasConflict(store, next)) throw new SlotTakenError();
       store.bookings = store.bookings.map((b) => (b.id === id ? next : b));
       save(store);

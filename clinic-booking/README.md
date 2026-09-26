@@ -54,7 +54,8 @@ npm run dev
    - Database Password 請設一組強密碼並記下來。
 2. 左側選單 **SQL Editor** → **New query**，打開本專案的 `supabase/01_schema.sql`，全部複製貼上。
    把最後一行的 `請改成診所的Email@example.com` 改成診所要用來登入的 Email，按 **Run**。
-   接著再開一個 **New query**，貼上 `supabase/02_patient_booking.sql` 的全部內容，按 **Run**。
+   接著依序再開 **New query**，分別貼上 `supabase/02_patient_booking.sql`、
+   `supabase/03_patient_cancel.sql` 的全部內容，各按一次 **Run**。
 3. 左側選單 **Authentication** → **Users** → **Add user** → **Create new user**，
    填同一個 Email 和密碼，勾選 **Auto Confirm User**。
 4. **Authentication** → **Sign In / Providers**，把 **Allow new users to sign up** 關掉
@@ -72,11 +73,13 @@ npm run dev
 - 病人預約頁只能「查詢哪些時段有空」和「送出預約」，拿不到任何病人資料。
 - 病人預約的限制：只能預約手機號碼（09 開頭）、同一支手機同一天只能約一個時段、
   同一支手機最多同時有 3 筆尚未看診的線上預約（可在 `clinic_settings.max_online_per_phone` 調整）。
+- 病人輸入手機號碼即可查詢並取消自己尚未看診的預約；姓名只顯示部分（例如 王○明），
+  同一個網路位置一小時內最多查詢 30 次。管理頁會標示「病人取消」。
 - 管理頁的「備份」按鈕可下載全部預約紀錄（CSV，可用 Excel 開啟）。
 
 ## 給工程師的說明
 
 - React + TypeScript + Vite；資料庫 Supabase（PostgreSQL + Row Level Security + Realtime）。
 - `src/data/types.ts` 定義資料操作介面，`supabaseApi.ts` 為正式實作，`demoApi.ts` 為瀏覽器示範實作。
-- `npm test` 執行單元測試；`npm run build` 產生 `dist/`。
+- `npm test` 執行單元測試；`npm run build` 產生 `dist/`；`npm run build:preview` 產生單一檔案的示範版。
 - 之後功能的預留欄位：`clinic_settings`（預約／取消時限、提醒開關）、`bookings.cancel_token`、`bookings.reminder_sent_at`。

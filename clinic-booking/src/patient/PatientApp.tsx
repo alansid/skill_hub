@@ -4,6 +4,7 @@ import { formatLunar, lunarOf } from '../lib/lunar';
 import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
 import { periodOf, type Period } from '../lib/schedule';
 import { patientApi, type BookResult, type BookingConfig, type DayAvailability } from './api';
+import { MyBookings } from './MyBookings';
 
 const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
   invalid_name: '請填寫姓名。',
@@ -36,6 +37,8 @@ export function PatientApp() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<Done | null>(null);
+  const [view, setView] = useState<'book' | 'mine'>('book');
+  const [lookupPhone, setLookupPhone] = useState('');
   const slotRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLElement>(null);
 
@@ -109,6 +112,19 @@ export function PatientApp() {
     setError('');
   }
 
+  function openMine(prefill = '') {
+    reset();
+    setLookupPhone(prefill);
+    setView('mine');
+    window.scrollTo({ top: 0 });
+  }
+
+  function openBook() {
+    reset();
+    setView('book');
+    void refresh();
+  }
+
   const notice = (
     <p className="notice">
       為免耽誤其他病人時間，敬請準時，任何延誤務必來電告知（<a href={phoneHref}>{phoneText}</a>）
@@ -118,14 +134,30 @@ export function PatientApp() {
   return (
     <div className="patient">
       {patientApi.mode === 'demo' && (
-        <div className="demo-banner">示範模式：資料只存在這台電腦的瀏覽器，不會上網。</div>
+        <div className="demo-banner">示範模式：資料只存在這台裝置的瀏覽器，不會上網。</div>
       )}
       <header className="p-header">
         <h1>{config?.clinicName ?? '任老師中醫'}</h1>
         <p>線上預約</p>
       </header>
 
-      {done ? (
+      <div className="p-tabs" role="tablist">
+        <button role="tab" aria-selected={view === 'book'} onClick={openBook}>
+          我要預約
+        </button>
+        <button role="tab" aria-selected={view === 'mine'} onClick={() => openMine()}>
+          查詢／取消預約
+        </button>
+      </div>
+
+      {view === 'mine' ? (
+        <MyBookings
+          key={lookupPhone}
+          initialPhone={lookupPhone}
+          clinicPhone={phoneText}
+          onBookNew={openBook}
+        />
+      ) : done ? (
         <section className="p-card success">
           <div className="check" aria-hidden>
             ✓
@@ -145,10 +177,18 @@ export function PatientApp() {
             <dd>{formatPhone(done.phone)}</dd>
           </dl>
           {notice}
-          <p className="p-muted">建議將此畫面截圖保存。如需更改或取消預約，請來電 <a href={phoneHref}>{phoneText}</a>。</p>
-          <button className="primary wide" onClick={reset}>
-            完成
-          </button>
+          <p className="p-muted">
+            建議將此畫面截圖保存。如需取消，請點上方「查詢／取消預約」，輸入手機號碼即可；或來電{' '}
+            <a href={phoneHref}>{phoneText}</a>。
+          </p>
+          <div className="success-actions">
+            <button className="wide" onClick={() => openMine(formatPhone(done.phone))}>
+              查看我的預約
+            </button>
+            <button className="primary wide" onClick={reset}>
+              完成
+            </button>
+          </div>
         </section>
       ) : (
         <>

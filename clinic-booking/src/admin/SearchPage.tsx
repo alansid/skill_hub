@@ -76,7 +76,9 @@ function ResultList({
             {b.name}
             {b.isExtra && <em className="tag">加號</em>}
             {b.source === 'online' && <em className="tag online">線上</em>}
-            {b.status === 'cancelled' && <em className="tag cancel">已取消</em>}
+            {b.status === 'cancelled' && (
+              <em className="tag cancel">{b.cancelledBy === 'patient' ? '病人取消' : '已取消'}</em>
+            )}
           </span>
           <span className="phone">{formatPhone(b.phone)}</span>
           {b.note && <span className="note">{b.note}</span>}

@@ -6,7 +6,7 @@ import { DEFAULT_SETTINGS } from '../lib/schedule';
 import { DayPage } from './DayPage';
 import { LoginPage } from './LoginPage';
 import { SearchPage } from './SearchPage';
-import { askConfirm, showMessage } from './askConfirm';
+import { askConfirm, showMessage } from '../lib/askConfirm';
 import { exportCsv } from './exportCsv';
 
 type View = 'day' | 'search';
@@ -49,7 +49,7 @@ export function AdminApp() {
   return (
     <div className="app">
       {api.mode === 'demo' && (
-        <div className="demo-banner">示範模式：資料只存在這台電腦的瀏覽器，不會上網。</div>
+        <div className="demo-banner">示範模式：資料只存在這台裝置的瀏覽器，不會上網。</div>
       )}
       <header className="topbar">
         <button className="brand" onClick={() => setView('day')}>

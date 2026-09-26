@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { load, save } from '../data/demoApi';
 import { addDays, todayInTaipei } from '../lib/dates';
-import { normalizePhone, isMobile } from '../lib/phone';
-import { DEFAULT_SETTINGS, patientAvailableSlots, scheduleFor, bookingRange } from '../lib/schedule';
+import { normalizePhone, isMobile, maskName } from '../lib/phone';
+import { DEFAULT_SETTINGS, patientAvailableSlots, scheduleFor, bookingRange, slotStart } from '../lib/schedule';
 
 // 病人預約頁使用的資料操作。病人只能：看設定、看哪些時段有空、送出預約。
 // 完全無法讀取任何其他病人的資料。
@@ -35,11 +35,25 @@ export type BookResult =
   | 'already_booked_that_day'
   | 'too_many';
 
+/** 病人查到的自己的預約（姓名已遮蔽） */
+export interface MyBooking {
+  id: string;
+  date: string;
+  /** 實際時間（有調整過就是調整後的時間） */
+  time: string;
+  maskedName: string;
+  canCancel: boolean;
+}
+
+export type CancelResult = 'ok' | 'not_found' | 'already_cancelled' | 'too_late';
+
 export interface PatientApi {
   readonly mode: 'demo' | 'supabase';
   getConfig(): Promise<BookingConfig>;
   getAvailability(from: string, to: string): Promise<DayAvailability[]>;
   book(date: string, slot: string, name: string, phone: string): Promise<BookResult>;
+  findMyBookings(phone: string): Promise<MyBooking[]>;
+  cancelMyBooking(phone: string, id: string): Promise<CancelResult>;
 }
 
 function createSupabasePatientApi(url: string, key: string): PatientApi {
@@ -82,6 +96,35 @@ function createSupabasePatientApi(url: string, key: string): PatientApi {
       });
       if (error) throw new Error('預約送出失敗，請稍後再試，或來電預約');
       return data as BookResult;
+    },
+    async findMyBookings(phone) {
+      const { data, error } = await sb.rpc('find_my_bookings', { p_phone: phone });
+      if (error) {
+        if (error.message.includes('rate_limited')) throw new Error('查詢次數太多，請稍後再試，或來電詢問。');
+        if (error.message.includes('invalid_phone')) throw new Error('請輸入正確的手機號碼（09 開頭，共 10 碼）。');
+        throw new Error('查詢失敗，請稍後再試，或來電詢問。');
+      }
+      return (
+        (data ?? []) as {
+          id: string;
+          date: string;
+          slot: string;
+          actual_time: string | null;
+          masked_name: string;
+          can_cancel: boolean;
+        }[]
+      ).map((r) => ({
+        id: r.id,
+        date: r.date,
+        time: r.actual_time ?? r.slot,
+        maskedName: r.masked_name,
+        canCancel: r.can_cancel,
+      }));
+    },
+    async cancelMyBooking(phone, id) {
+      const { data, error } = await sb.rpc('cancel_my_booking', { p_phone: phone, p_id: id });
+      if (error) throw new Error('取消失敗，請稍後再試，或來電取消。');
+      return data as CancelResult;
     },
   };
 }
@@ -147,7 +190,36 @@ function createDemoPatientApi(): PatientApi {
         createdAt: now,
         updatedAt: now,
         cancelledAt: null,
+        cancelledBy: null,
       });
+      save(store);
+      return 'ok';
+    },
+    async findMyBookings(phone) {
+      const digits = normalizePhone(phone);
+      if (!isMobile(digits)) throw new Error('請輸入正確的手機號碼（09 開頭，共 10 碼）。');
+      const now = Date.now();
+      return load()
+        .bookings.filter(
+          (b) => b.phone === digits && b.status === 'booked' && slotStart(b.date, b.time ?? b.slot).getTime() > now,
+        )
+        .sort((a, b) => (a.date + a.slot).localeCompare(b.date + b.slot))
+        .map((b) => ({
+          id: b.id,
+          date: b.date,
+          time: b.time ?? b.slot,
+          maskedName: maskName(b.name),
+          canCancel: true,
+        }));
+    },
+    async cancelMyBooking(phone, id) {
+      const store = load();
+      const b = store.bookings.find((x) => x.id === id && x.phone === normalizePhone(phone));
+      if (!b) return 'not_found';
+      if (b.status !== 'booked') return 'already_cancelled';
+      if (slotStart(b.date, b.time ?? b.slot).getTime() <= Date.now()) return 'too_late';
+      const now = new Date().toISOString();
+      Object.assign(b, { status: 'cancelled', cancelledAt: now, cancelledBy: 'patient', updatedAt: now });
       save(store);
       return 'ok';
     },

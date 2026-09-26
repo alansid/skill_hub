@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, formatGregorian, todayInTaipei, weekdayName } from './dates';
 import { formatLunar } from './lunar';
-import { formatPhone, normalizePhone } from './phone';
+import { formatPhone, maskName, normalizePhone } from './phone';
 import {
   DEFAULT_SETTINGS,
   bookingRange,
@@ -98,5 +98,14 @@ describe('病人可預約時段', () => {
   it('最晚預約時限（預留功能）', () => {
     const slots = patientAvailableSlots('2026-09-29', { ...s, minHoursBeforeBooking: 2 }, undefined, new Set(), now);
     expect(slots).toEqual(['17:10', '19:30', '20:10']);
+  });
+});
+
+describe('姓名遮蔽', () => {
+  it('只顯示頭尾', () => {
+    expect(maskName('王小明')).toBe('王○明');
+    expect(maskName('王明')).toBe('王○');
+    expect(maskName('歐陽小明')).toBe('歐○○明');
+    expect(maskName('王')).toBe('王');
   });
 });

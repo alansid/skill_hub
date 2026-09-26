@@ -18,3 +18,11 @@ export function formatPhone(digits: string): string {
 export function isMobile(digits: string): boolean {
   return /^09\d{8}$/.test(digits);
 }
+
+/** 姓名遮蔽：王小明 → 王○明；王明 → 王○（與資料庫 mask_name 相同） */
+export function maskName(name: string): string {
+  const chars = [...name];
+  if (chars.length <= 1) return name;
+  if (chars.length === 2) return chars[0] + '○';
+  return chars[0] + '○'.repeat(chars.length - 2) + chars[chars.length - 1];
+}

@@ -232,7 +232,7 @@ function BookingRow({
           {b.name}
           {b.isExtra && <em className="tag">加號</em>}
           {b.source === 'online' && <em className="tag online">線上</em>}
-          {cancelled && <em className="tag cancel">已取消</em>}
+          {cancelled && <em className="tag cancel">{b.cancelledBy === 'patient' ? '病人取消' : '已取消'}</em>}
         </span>
         <span className="phone">{formatPhone(b.phone)}</span>
         <span className="note">{b.note}</span>

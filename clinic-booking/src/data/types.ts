@@ -43,6 +43,8 @@ export interface Booking {
   createdAt: string;
   updatedAt: string;
   cancelledAt: string | null;
+  /** 誰取消的：clinic = 診所；patient = 病人線上取消 */
+  cancelledBy: 'clinic' | 'patient' | null;
 }
 
 export interface NewBooking {

@@ -4,7 +4,7 @@ import type { Booking, BookingPatch, ClinicSettings } from '../data/types';
 import { formatGregorian, isValidDate, weekdayName } from '../lib/dates';
 import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
 import { normalizeTime } from '../lib/schedule';
-import { askConfirm } from './askConfirm';
+import { askConfirm } from '../lib/askConfirm';
 import { Modal } from './Modal';
 
 export type BookingDialogTarget =
@@ -192,7 +192,11 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
           <p className="meta">
             {existing.source === 'online' ? '病人線上預約' : '櫃台登記'}・建立於 {taipeiTime(existing.createdAt)}
             {existing.updatedAt !== existing.createdAt && <>・最後修改 {taipeiTime(existing.updatedAt)}</>}
-            {existing.cancelledAt && <>・取消於 {taipeiTime(existing.cancelledAt)}</>}
+            {existing.cancelledAt && (
+              <>
+                ・{existing.cancelledBy === 'patient' ? '病人線上取消' : '取消'}於 {taipeiTime(existing.cancelledAt)}
+              </>
+            )}
           </p>
         )}
 
