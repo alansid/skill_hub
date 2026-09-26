@@ -12,8 +12,7 @@ await build({
   base: './',
   // 示範版一律不連資料庫
   define: {
-    'import.meta.env.VITE_SUPABASE_URL': '""',
-    'import.meta.env.VITE_SUPABASE_ANON_KEY': '""',
+    'import.meta.env.VITE_DEMO': '"1"',
     // 示範版不顯示撥號連結
     'import.meta.env.VITE_PREVIEW': '"1"',
   },

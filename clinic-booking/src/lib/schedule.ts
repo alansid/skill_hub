@@ -18,6 +18,8 @@ export const DEFAULT_SETTINGS: ClinicSettings = {
   bookingWindowDays: 90,
   sameDayBooking: true,
   minMinutesBeforeBooking: 30,
+  minHoursBeforeCancel: 0,
+  maxOnlinePerPhone: 3,
 };
 
 export type Period = '上午' | '下午' | '晚上';

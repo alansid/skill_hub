@@ -7,7 +7,6 @@ import { SlotTakenError } from './types';
 
 export const KEY = 'ren-clinic-demo-v1';
 const USER_KEY = 'ren-clinic-demo-user';
-export const DEMO_EMAIL = 'demo@example.com';
 export const DEMO_PASSWORD = 'demo1234';
 
 // 瀏覽器不允許儲存時（例如無痕模式），改存在記憶體裡，重新整理就會清空
@@ -74,11 +73,9 @@ export function createDemoApi(): AdminApi {
     async currentUser() {
       return getItem(USER_KEY);
     },
-    async signIn(email, password) {
-      if (email.trim().toLowerCase() !== DEMO_EMAIL || password !== DEMO_PASSWORD) {
-        throw new Error('帳號或密碼錯誤');
-      }
-      setItem(USER_KEY, DEMO_EMAIL);
+    async signIn(password) {
+      if (password !== DEMO_PASSWORD) throw new Error('密碼錯誤');
+      setItem(USER_KEY, '診所');
     },
     async signOut() {
       setItem(USER_KEY, null);

@@ -1,9 +1,8 @@
+import { createCloudApi } from './cloudApi';
 import { createDemoApi } from './demoApi';
-import { createSupabaseApi } from './supabaseApi';
 import type { AdminApi } from './types';
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+/** 示範版（VITE_DEMO=1）資料只存在瀏覽器；正式網站連 Cloudflare 資料庫。 */
+export const isDemo = import.meta.env.VITE_DEMO === '1';
 
-/** 有設定 Supabase 就連正式資料庫，沒有就用示範模式。 */
-export const api: AdminApi = url && key ? createSupabaseApi(url, key) : createDemoApi();
+export const api: AdminApi = isDemo ? createDemoApi() : createCloudApi();
