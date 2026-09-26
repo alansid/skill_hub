@@ -1,0 +1,218 @@
+import { useState, type FormEvent } from 'react';
+import { api } from '../data';
+import type { Booking, BookingPatch, ClinicSettings } from '../data/types';
+import { formatGregorian, isValidDate, weekdayName } from '../lib/dates';
+import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
+import { normalizeTime } from '../lib/schedule';
+import { Modal } from './Modal';
+
+export type BookingDialogTarget =
+  | { kind: 'new'; date: string; slot: string; isExtra: boolean }
+  | { kind: 'edit'; booking: Booking };
+
+interface Props {
+  target: BookingDialogTarget;
+  settings: ClinicSettings;
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+function taipeiTime(iso: string): string {
+  return new Date(iso).toLocaleString('zh-TW', {
+    timeZone: 'Asia/Taipei',
+    hour12: false,
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
+  const existing = target.kind === 'edit' ? target.booking : null;
+  const [date, setDate] = useState(existing?.date ?? (target.kind === 'new' ? target.date : ''));
+  const [slot, setSlot] = useState(existing?.slot ?? (target.kind === 'new' ? target.slot : ''));
+  const [time, setTime] = useState(existing?.time ?? '');
+  const [name, setName] = useState(existing?.name ?? '');
+  const [phone, setPhone] = useState(existing ? formatPhone(existing.phone) : '');
+  const [note, setNote] = useState(existing?.note ?? '');
+  const [isExtra, setIsExtra] = useState(existing?.isExtra ?? (target.kind === 'new' && target.isExtra));
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const cancelled = existing?.status === 'cancelled';
+  const slotOptions = settings.slots.includes(slot) ? settings.slots : [...settings.slots, slot].sort();
+  const phoneDigits = normalizePhone(phone);
+
+  function validate(): BookingPatch | null {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      setError('請填寫姓名');
+      return null;
+    }
+    if (!isValidDate(date)) {
+      setError('日期格式不正確');
+      return null;
+    }
+    let actual: string | null = null;
+    if (time.trim()) {
+      actual = normalizeTime(time);
+      if (!actual) {
+        setError('實際時間格式不正確，請用像 19:50 這樣的格式');
+        return null;
+      }
+      if (actual === slot) actual = null;
+    }
+    return {
+      date,
+      slot,
+      time: actual,
+      name: trimmedName,
+      phone: phoneDigits,
+      note: note.trim(),
+      isExtra,
+    };
+  }
+
+  async function run(action: () => Promise<unknown>) {
+    setBusy(true);
+    setError('');
+    try {
+      await action();
+      onSaved();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    const data = validate();
+    if (!data) return;
+    if (existing) {
+      void run(() => api.updateBooking(existing.id, data));
+    } else {
+      void run(() =>
+        api.createBooking({
+          date: data.date!,
+          slot: data.slot!,
+          time: data.time ?? null,
+          name: data.name!,
+          phone: data.phone!,
+          note: data.note!,
+          isExtra: data.isExtra!,
+        }),
+      );
+    }
+  }
+
+  function cancelBooking() {
+    if (!existing) return;
+    if (!confirm(`確定要取消「${existing.name}」${existing.slot} 的預約嗎？\n（紀錄會保留，標示為已取消）`)) return;
+    void run(() => api.updateBooking(existing.id, { status: 'cancelled' }));
+  }
+
+  function restoreBooking() {
+    if (!existing) return;
+    void run(() => api.updateBooking(existing.id, { status: 'booked' }));
+  }
+
+  const title = existing
+    ? cancelled
+      ? '已取消的預約'
+      : '修改預約'
+    : isExtra
+      ? '加號登記'
+      : '新增預約';
+
+  return (
+    <Modal title={title} onClose={onClose}>
+      <form className="form" onSubmit={submit}>
+        <div className="form-row two">
+          <label>
+            日期
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            {isValidDate(date) && <small>{formatGregorian(date)} {weekdayName(date)}</small>}
+          </label>
+          <label>
+            時段
+            <select value={slot} onChange={(e) => setSlot(e.target.value)}>
+              {slotOptions.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <label>
+          姓名
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={50} required autoFocus={!existing} />
+        </label>
+        <label>
+          電話手機
+          <input
+            type="tel"
+            inputMode="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="0912-345-678"
+          />
+          {phoneDigits && !isMobile(phoneDigits) && <small className="warn-text">這不是 09 開頭的手機號碼，請再確認一次</small>}
+        </label>
+        <label>
+          備註
+          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={500} />
+        </label>
+        <div className="form-row two">
+          <label>
+            實際時間（選填）
+            <input
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              placeholder={`例如 ${slot.slice(0, 3)}50`}
+              inputMode="numeric"
+            />
+            <small>與時段不同時才需要填</small>
+          </label>
+          <label className="checkbox">
+            <input type="checkbox" checked={isExtra} onChange={(e) => setIsExtra(e.target.checked)} />
+            加號（此時段已有人）
+          </label>
+        </div>
+
+        {existing && (
+          <p className="meta">
+            {existing.source === 'online' ? '病人線上預約' : '櫃台登記'}・建立於 {taipeiTime(existing.createdAt)}
+            {existing.updatedAt !== existing.createdAt && <>・最後修改 {taipeiTime(existing.updatedAt)}</>}
+            {existing.cancelledAt && <>・取消於 {taipeiTime(existing.cancelledAt)}</>}
+          </p>
+        )}
+
+        {error && <p className="error">{error}</p>}
+
+        <div className="actions">
+          {existing && !cancelled && (
+            <button type="button" className="danger" onClick={cancelBooking} disabled={busy}>
+              取消預約
+            </button>
+          )}
+          {existing && cancelled && (
+            <button type="button" onClick={restoreBooking} disabled={busy}>
+              恢復預約
+            </button>
+          )}
+          <span className="spacer" />
+          <button type="button" onClick={onClose} disabled={busy}>
+            關閉
+          </button>
+          <button type="submit" className="primary" disabled={busy}>
+            {busy ? '儲存中…' : '儲存'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
