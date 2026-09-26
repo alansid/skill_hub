@@ -93,6 +93,7 @@ export function createSupabaseApi(url: string, anonKey: string): AdminApi {
         slots: data.slots,
         bookingWindowDays: data.booking_window_days,
         sameDayBooking: data.same_day_booking,
+        minHoursBeforeBooking: data.min_hours_before_booking,
       };
     },
     async listOverrides(from, to) {

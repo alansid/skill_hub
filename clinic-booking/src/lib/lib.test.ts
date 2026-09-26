@@ -2,7 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { addDays, formatGregorian, todayInTaipei, weekdayName } from './dates';
 import { formatLunar } from './lunar';
 import { formatPhone, normalizePhone } from './phone';
-import { DEFAULT_SETTINGS, nextOpenDay, normalizeTime, periodOf, scheduleFor } from './schedule';
+import {
+  DEFAULT_SETTINGS,
+  bookingRange,
+  nextOpenDay,
+  normalizeTime,
+  patientAvailableSlots,
+  periodOf,
+  scheduleFor,
+  slotStart,
+} from './schedule';
 import type { DayOverride } from '../data/types';
 
 describe('日期', () => {
@@ -67,5 +76,27 @@ describe('看診日與時段', () => {
     expect(periodOf('11:10')).toBe('上午');
     expect(periodOf('17:10')).toBe('下午');
     expect(periodOf('19:30')).toBe('晚上');
+  });
+});
+
+describe('病人可預約時段', () => {
+  const s = DEFAULT_SETTINGS;
+  // 台灣時間 2026-09-29（週二）15:00
+  const now = new Date('2026-09-29T07:00:00Z');
+  it('時段開始時刻以台灣時間計算', () => {
+    expect(slotStart('2026-09-29', '08:30').toISOString()).toBe('2026-09-29T00:30:00.000Z');
+  });
+  it('當天只顯示還沒開始的時段，且排除已被預約的', () => {
+    const slots = patientAvailableSlots('2026-09-29', s, undefined, new Set(['19:30']), now);
+    expect(slots).toEqual(['15:10', '16:30', '17:10', '20:10']);
+  });
+  it('超過 90 天或休診日沒有時段', () => {
+    expect(bookingRange(s, now)).toEqual({ from: '2026-09-29', to: '2026-12-28' });
+    expect(patientAvailableSlots('2026-12-29', s, undefined, new Set(), now)).toEqual([]);
+    expect(patientAvailableSlots('2026-09-28', s, undefined, new Set(), now)).toEqual([]);
+  });
+  it('最晚預約時限（預留功能）', () => {
+    const slots = patientAvailableSlots('2026-09-29', { ...s, minHoursBeforeBooking: 2 }, undefined, new Set(), now);
+    expect(slots).toEqual(['17:10', '19:30', '20:10']);
   });
 });

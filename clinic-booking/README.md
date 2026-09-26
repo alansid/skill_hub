@@ -3,7 +3,7 @@
 ## 目前進度
 
 - [x] 第一階段：診所管理頁（`admin.html`）
-- [ ] 第二階段：病人預約頁（`index.html`，目前只是「即將開放」的暫時頁面）
+- [x] 第二階段：病人預約頁（`index.html`）
 - [ ] 第三階段：放上網路
 
 ## 在自己電腦上試用
@@ -31,7 +31,11 @@
 npm run dev
 ```
 
-看到 `http://localhost:5173/` 後，用瀏覽器打開 <http://localhost:5173/admin.html>。
+看到 `http://localhost:5173/` 後，用瀏覽器打開：
+
+- 診所管理頁：<http://localhost:5173/admin.html>
+- 病人預約頁：<http://localhost:5173/>
+
 要關掉網站時，在終端機按 Ctrl＋C。
 
 ### 示範模式
@@ -41,6 +45,7 @@ npm run dev
 - 登入帳號：`demo@example.com`，密碼：`demo1234`
 - 資料只存在這台電腦的瀏覽器裡，不會上網，可以放心亂試。
 - 同一台電腦開兩個分頁，可以體驗「一邊登記、另一邊自動更新」。
+- 在病人預約頁預約後，管理頁會出現這筆預約，並標示「線上」。
 
 ## 連接正式資料庫（Supabase）
 
@@ -49,6 +54,7 @@ npm run dev
    - Database Password 請設一組強密碼並記下來。
 2. 左側選單 **SQL Editor** → **New query**，打開本專案的 `supabase/01_schema.sql`，全部複製貼上。
    把最後一行的 `請改成診所的Email@example.com` 改成診所要用來登入的 Email，按 **Run**。
+   接著再開一個 **New query**，貼上 `supabase/02_patient_booking.sql` 的全部內容，按 **Run**。
 3. 左側選單 **Authentication** → **Users** → **Add user** → **Create new user**，
    填同一個 Email 和密碼，勾選 **Auto Confirm User**。
 4. **Authentication** → **Sign In / Providers**，把 **Allow new users to sign up** 關掉
@@ -63,6 +69,9 @@ npm run dev
 - 未登入的人無法讀取任何資料；登入後也必須在 `staff`（診所人員）名單上才能看資料。
 - 預約只能「取消」不能刪除，紀錄永遠保留。
 - 同一時段只允許一筆有效預約（加號除外），由資料庫保證，兩人同時搶位只有一人成功。
+- 病人預約頁只能「查詢哪些時段有空」和「送出預約」，拿不到任何病人資料。
+- 病人預約的限制：只能預約手機號碼（09 開頭）、同一支手機同一天只能約一個時段、
+  同一支手機最多同時有 3 筆尚未看診的線上預約（可在 `clinic_settings.max_online_per_phone` 調整）。
 - 管理頁的「備份」按鈕可下載全部預約紀錄（CSV，可用 Excel 開啟）。
 
 ## 給工程師的說明

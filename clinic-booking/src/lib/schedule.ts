@@ -1,4 +1,4 @@
-import { addDays, weekdayOf } from './dates';
+import { addDays, todayInTaipei, weekdayOf } from './dates';
 import type { ClinicSettings, DayOverride } from '../data/types';
 
 export const DEFAULT_SLOTS = [
@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: ClinicSettings = {
   slots: DEFAULT_SLOTS,
   bookingWindowDays: 90,
   sameDayBooking: true,
+  minHoursBeforeBooking: 0,
 };
 
 export type Period = '上午' | '下午' | '晚上';
@@ -89,4 +90,39 @@ export function normalizeTime(input: string): string | null {
   const min = Number(m[2]);
   if (h > 23 || min > 59) return null;
   return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+}
+
+/** 某天某時段的開始時刻（台灣時間） */
+export function slotStart(date: string, slot: string): Date {
+  const [y, m, d] = date.split('-').map(Number);
+  const [h, min] = slot.split(':').map(Number);
+  return new Date(Date.UTC(y, m - 1, d, h - 8, min));
+}
+
+/** 病人可以預約的日期範圍 */
+export function bookingRange(settings: ClinicSettings, now: Date = new Date()): { from: string; to: string } {
+  const today = todayInTaipei(now);
+  return {
+    from: settings.sameDayBooking ? today : addDays(today, 1),
+    to: addDays(today, settings.bookingWindowDays),
+  };
+}
+
+/**
+ * 病人看得到的空時段：當天有開、還沒有人約、而且還沒過（含最晚預約時限）。
+ * 與資料庫的 get_availability 規則相同（示範模式用）。
+ */
+export function patientAvailableSlots(
+  date: string,
+  settings: ClinicSettings,
+  override: DayOverride | undefined,
+  takenSlots: Set<string>,
+  now: Date = new Date(),
+): string[] {
+  const { from, to } = bookingRange(settings, now);
+  if (date < from || date > to) return [];
+  const cutoff = now.getTime() + settings.minHoursBeforeBooking * 3600_000;
+  return scheduleFor(date, settings, override).slots.filter(
+    (s) => !takenSlots.has(s) && slotStart(date, s).getTime() > cutoff,
+  );
 }

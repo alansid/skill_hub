@@ -9,6 +9,8 @@ export interface ClinicSettings {
   bookingWindowDays: number;
   /** 病人可否預約當天 */
   sameDayBooking: boolean;
+  /** 病人最晚要在看診前幾小時預約（0 = 時段開始前都可以） */
+  minHoursBeforeBooking: number;
 }
 
 /** 某一天的特別設定：臨時休診，或只開部分時段 */

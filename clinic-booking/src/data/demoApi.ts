@@ -5,17 +5,17 @@ import { SlotTakenError } from './types';
 // 示範模式：資料存在瀏覽器裡（localStorage），只給試用與測試。
 // 同一台電腦開兩個分頁也會互相同步，可以用來體驗「即時同步」。
 
-const KEY = 'ren-clinic-demo-v1';
+export const KEY = 'ren-clinic-demo-v1';
 const USER_KEY = 'ren-clinic-demo-user';
 export const DEMO_EMAIL = 'demo@example.com';
 export const DEMO_PASSWORD = 'demo1234';
 
-interface Store {
+export interface Store {
   bookings: Booking[];
   overrides: DayOverride[];
 }
 
-function load(): Store {
+export function load(): Store {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) return JSON.parse(raw) as Store;
@@ -25,9 +25,9 @@ function load(): Store {
   return { bookings: [], overrides: [] };
 }
 
-const listeners = new Set<() => void>();
+export const listeners = new Set<() => void>();
 
-function save(store: Store) {
+export function save(store: Store) {
   localStorage.setItem(KEY, JSON.stringify(store));
   listeners.forEach((fn) => fn());
 }
