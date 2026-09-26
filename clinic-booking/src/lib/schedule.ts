@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS: ClinicSettings = {
   slots: DEFAULT_SLOTS,
   bookingWindowDays: 90,
   sameDayBooking: true,
-  minHoursBeforeBooking: 0,
+  minMinutesBeforeBooking: 30,
 };
 
 export type Period = '上午' | '下午' | '晚上';
@@ -121,7 +121,7 @@ export function patientAvailableSlots(
 ): string[] {
   const { from, to } = bookingRange(settings, now);
   if (date < from || date > to) return [];
-  const cutoff = now.getTime() + settings.minHoursBeforeBooking * 3600_000;
+  const cutoff = now.getTime() + settings.minMinutesBeforeBooking * 60_000;
   return scheduleFor(date, settings, override).slots.filter(
     (s) => !takenSlots.has(s) && slotStart(date, s).getTime() > cutoff,
   );

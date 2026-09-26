@@ -34,7 +34,8 @@ export async function exportCsv(bookings: Booking[]) {
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const a = document.createElement('a');
   a.href = url;
-  a.download = `任老師中醫預約備份-${todayInTaipei()}.csv`;
+  // 檔名用英文，避免部分手機、瀏覽器把中文檔名變成沒有副檔名的「download」
+  a.download = `ren-clinic-backup-${todayInTaipei()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }

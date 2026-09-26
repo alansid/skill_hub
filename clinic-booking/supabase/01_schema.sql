@@ -19,7 +19,8 @@ create table if not exists public.clinic_settings (
   -- 病人可否預約當天
   same_day_booking    boolean not null default true,
   -- 以下為之後功能預留
-  min_hours_before_booking int     not null default 0,
+  -- 病人最晚要在看診前幾分鐘預約
+  min_minutes_before_booking int  not null default 30,
   min_hours_before_cancel  int     not null default 0,
   allow_patient_cancel     boolean not null default false,
   reminder_enabled         boolean not null default false

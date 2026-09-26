@@ -35,10 +35,10 @@ $$;
 -- 病人可見的診所設定
 create or replace function public.get_booking_config()
 returns table (clinic_name text, clinic_phone text, booking_window_days int,
-               same_day_booking boolean, min_hours_before_booking int, today date)
+               same_day_booking boolean, min_minutes_before_booking int, today date)
 language sql stable security definer set search_path = public as $$
   select clinic_name, clinic_phone, booking_window_days, same_day_booking,
-         min_hours_before_booking, taipei_now()::date
+         min_minutes_before_booking, taipei_now()::date
   from public.clinic_settings where id = 1
 $$;
 
@@ -62,7 +62,7 @@ language sql stable security definer set search_path = public as $$
   select o.d,
          array(
            select x from unnest(o.slots) x, cfg
-           where (o.d + x::time) > cfg.now_tpe + make_interval(hours => cfg.min_hours_before_booking)
+           where (o.d + x::time) > cfg.now_tpe + make_interval(mins => cfg.min_minutes_before_booking)
              and not exists (
                select 1 from public.bookings b
                where b.date = o.d and b.slot = x and b.status = 'booked')
@@ -92,7 +92,7 @@ begin
 
   if p_date > now_tpe::date + cfg.booking_window_days then return 'too_far'; end if;
   if not cfg.same_day_booking and p_date <= now_tpe::date then return 'too_late'; end if;
-  if (p_date + p_slot::time) <= now_tpe + make_interval(hours => cfg.min_hours_before_booking) then
+  if (p_date + p_slot::time) <= now_tpe + make_interval(mins => cfg.min_minutes_before_booking) then
     return 'too_late';
   end if;
   if not (p_slot = any (open_slots_on(p_date))) then return 'slot_unavailable'; end if;

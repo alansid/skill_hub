@@ -86,9 +86,17 @@ describe('病人可預約時段', () => {
   it('時段開始時刻以台灣時間計算', () => {
     expect(slotStart('2026-09-29', '08:30').toISOString()).toBe('2026-09-29T00:30:00.000Z');
   });
-  it('當天只顯示還沒開始的時段，且排除已被預約的', () => {
+  it('當天只顯示 30 分鐘後才開始的時段，且排除已被預約的', () => {
+    // 15:00 時，15:10 只剩 10 分鐘，不能約
     const slots = patientAvailableSlots('2026-09-29', s, undefined, new Set(['19:30']), now);
-    expect(slots).toEqual(['15:10', '16:30', '17:10', '20:10']);
+    expect(slots).toEqual(['16:30', '17:10', '20:10']);
+  });
+  it('看診前 30 分鐘內不能預約', () => {
+    // 台灣時間 08:05 → 08:30 只剩 25 分鐘，不能約；09:10 可以
+    const early = new Date('2026-09-29T00:05:00Z');
+    expect(patientAvailableSlots('2026-09-29', s, undefined, new Set(), early).slice(0, 2)).toEqual(['09:10', '09:50']);
+    // 07:59 → 08:30 還有 31 分鐘，可以約
+    expect(patientAvailableSlots('2026-09-29', s, undefined, new Set(), new Date('2026-09-28T23:59:00Z'))[0]).toBe('08:30');
   });
   it('超過 90 天或休診日沒有時段', () => {
     expect(bookingRange(s, now)).toEqual({ from: '2026-09-29', to: '2026-12-28' });
@@ -96,7 +104,7 @@ describe('病人可預約時段', () => {
     expect(patientAvailableSlots('2026-09-28', s, undefined, new Set(), now)).toEqual([]);
   });
   it('最晚預約時限（預留功能）', () => {
-    const slots = patientAvailableSlots('2026-09-29', { ...s, minHoursBeforeBooking: 2 }, undefined, new Set(), now);
+    const slots = patientAvailableSlots('2026-09-29', { ...s, minMinutesBeforeBooking: 120 }, undefined, new Set(), now);
     expect(slots).toEqual(['17:10', '19:30', '20:10']);
   });
 });
