@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { addDays, formatGregorian, weekdayName, weekdayOf, weekdayShort } from '../lib/dates';
 import { formatLunar, lunarOf } from '../lib/lunar';
 import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
@@ -39,6 +39,9 @@ export function PatientApp() {
   const [done, setDone] = useState<Done | null>(null);
   const [view, setView] = useState<'book' | 'mine'>('book');
   const [lookupPhone, setLookupPhone] = useState('');
+  // 時段篩選：null = 不限
+  const [period, setPeriod] = useState<Period | null>(null);
+  const [time, setTime] = useState<string | null>(null);
   const slotRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLElement>(null);
 
@@ -62,7 +65,32 @@ export function PatientApp() {
 
   const phoneText = config?.clinicPhone ?? '02-23022457';
   const phoneHref = 'tel:' + phoneText.replace(/\D/g, '');
-  const selectedDay = days?.find((d) => d.date === date) ?? null;
+  // 所有出現過的時段（用來列出可篩選的時間）
+  const allTimes = useMemo(
+    () => [...new Set((days ?? []).flatMap((d) => d.available))].sort(),
+    [days],
+  );
+  // 依篩選條件，只留下符合的空時段
+  const filteredDays = useMemo(
+    () =>
+      days?.map((d) => ({
+        ...d,
+        available: d.available.filter((s) => (!period || periodOf(s) === period) && (!time || s === time)),
+      })) ?? null,
+    [days, period, time],
+  );
+  const selectedDay = filteredDays?.find((d) => d.date === date) ?? null;
+
+  function choosePeriod(p: Period | null) {
+    setPeriod(p);
+    setTime(null);
+    setSlot(null);
+  }
+
+  function chooseTime(t: string | null) {
+    setTime(t);
+    setSlot(null);
+  }
 
   function pickDate(d: string) {
     setDate(d);
@@ -201,7 +229,44 @@ export function PatientApp() {
             {loadError && <p className="error">{loadError}</p>}
             {!days && !loadError && <p className="p-muted">載入中…</p>}
             {days && days.length === 0 && <p className="p-muted">目前沒有可預約的日期，請來電預約。</p>}
-            {days && <DateGrid days={days} selected={date} onPick={pickDate} />}
+            {days && days.length > 0 && (
+              <div className="filter">
+                <span className="filter-label">想約的時段</span>
+                <div className="filter-row">
+                  <button className={'chip-btn' + (period === null ? ' on' : '')} onClick={() => choosePeriod(null)}>
+                    不限
+                  </button>
+                  {PERIODS.map((p) => (
+                    <button
+                      key={p}
+                      className={'chip-btn' + (period === p ? ' on' : '')}
+                      onClick={() => choosePeriod(p)}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                {period && (
+                  <div className="filter-row">
+                    <button className={'chip-btn small' + (time === null ? ' on' : '')} onClick={() => chooseTime(null)}>
+                      {period}都可以
+                    </button>
+                    {allTimes
+                      .filter((t) => periodOf(t) === period)
+                      .map((t) => (
+                        <button
+                          key={t}
+                          className={'chip-btn small' + (time === t ? ' on' : '')}
+                          onClick={() => chooseTime(t)}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {filteredDays && <DateGrid days={filteredDays} selected={date} onPick={pickDate} />}
             {config && (
               <p className="p-muted small">
                 可預約今天起 {config.bookingWindowDays} 天內的日期；只顯示看診日。
@@ -217,6 +282,7 @@ export function PatientApp() {
                   {formatGregorian(date)} {weekdayName(date)}
                 </small>
               </h2>
+              {(period || time) && <p className="p-muted small filter-note">只顯示「{time ?? period}」的時段，要看其他時段請在上方改成「不限」。</p>}
               {selectedDay && selectedDay.available.length > 0 ? (
                 PERIODS.map((p) => {
                   const list = selectedDay.available.filter((s) => periodOf(s) === p);

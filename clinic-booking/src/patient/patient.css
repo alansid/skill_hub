@@ -110,3 +110,11 @@
 .my-time { font-size: 1.3rem; color: var(--red); font-weight: 700; font-variant-numeric: tabular-nums; }
 .my-list .p-muted.small { margin: 0; }
 .my-list button { flex-shrink: 0; }
+
+.filter { display: grid; gap: 0.4rem; margin-bottom: 0.4rem; padding-bottom: 0.6rem; border-bottom: 1px dashed var(--rule); }
+.filter-label { font-size: 0.9rem; color: var(--ink-2); }
+.filter-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chip-btn { border-radius: 999px; min-height: 40px; padding: 0.3rem 1rem; background: #fff; }
+.chip-btn.small { min-height: 34px; padding: 0.2rem 0.75rem; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+.chip-btn.on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.filter-note { margin: 0 0 0.4rem; }
