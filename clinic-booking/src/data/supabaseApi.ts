@@ -128,6 +128,18 @@ export function createSupabaseApi(url: string, anonKey: string): AdminApi {
       check(error);
       return ((data ?? []) as BookingRow[]).map(toBooking).sort(byTime);
     },
+    async listActiveBookingsBetween(from, to) {
+      const { data, error } = await sb
+        .from('bookings')
+        .select(BOOKING_COLUMNS)
+        .eq('status', 'booked')
+        .gte('date', from)
+        .lte('date', to)
+        .order('date')
+        .order('slot');
+      check(error);
+      return ((data ?? []) as BookingRow[]).map(toBooking);
+    },
     async createBooking(b) {
       const { data, error } = await sb
         .from('bookings')

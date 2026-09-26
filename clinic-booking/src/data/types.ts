@@ -82,6 +82,8 @@ export interface AdminApi {
   deleteOverride(date: string): Promise<void>;
 
   listBookings(date: string): Promise<Booking[]>;
+  /** 一段期間內「有效」的預約（休假設定時提醒要聯絡的病人） */
+  listActiveBookingsBetween(from: string, to: string): Promise<Booking[]>;
   createBooking(b: NewBooking): Promise<Booking>;
   updateBooking(id: string, patch: BookingPatch): Promise<void>;
   searchBookings(query: string): Promise<Booking[]>;

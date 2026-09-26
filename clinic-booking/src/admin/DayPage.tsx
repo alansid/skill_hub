@@ -7,6 +7,7 @@ import { formatPhone } from '../lib/phone';
 import { nextOpenDay, periodOf, scheduleFor } from '../lib/schedule';
 import { BookingDialog, type BookingDialogTarget } from './BookingDialog';
 import { DaySettingsDialog } from './DaySettingsDialog';
+import { VacationDialog } from './VacationDialog';
 
 interface Props {
   date: string;
@@ -20,6 +21,7 @@ export function DayPage({ date, setDate, settings }: Props) {
   const [loadError, setLoadError] = useState('');
   const [dialog, setDialog] = useState<BookingDialogTarget | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showVacation, setShowVacation] = useState(false);
   const [showCancelled, setShowCancelled] = useState(true);
 
   const load = useCallback(async () => {
@@ -108,7 +110,10 @@ export function DayPage({ date, setDate, settings }: Props) {
           onChange={(e) => isValidDate(e.target.value) && setDate(e.target.value)}
           aria-label="選擇日期"
         />
-        <button onClick={() => setShowSettings(true)}>本日看診設定</button>
+        <span className="toolbar-right">
+          <button onClick={() => setShowSettings(true)}>本日看診設定</button>
+          <button onClick={() => setShowVacation(true)}>休假設定</button>
+        </span>
       </section>
 
       <section className="summary">
@@ -185,6 +190,20 @@ export function DayPage({ date, setDate, settings }: Props) {
           onClose={() => setDialog(null)}
           onSaved={() => {
             setDialog(null);
+            void load();
+          }}
+        />
+      )}
+      {showVacation && (
+        <VacationDialog
+          startDate={date}
+          settings={settings}
+          onClose={() => {
+            setShowVacation(false);
+            void load();
+          }}
+          onSaved={() => {
+            setShowVacation(false);
             void load();
           }}
         />

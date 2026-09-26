@@ -102,6 +102,11 @@ export function createDemoApi(): AdminApi {
     async listBookings(date) {
       return load().bookings.filter((b) => b.date === date).sort(byTime);
     },
+    async listActiveBookingsBetween(from, to) {
+      return load()
+        .bookings.filter((b) => b.status === 'booked' && b.date >= from && b.date <= to)
+        .sort((a, b) => a.date.localeCompare(b.date) || byTime(a, b));
+    },
     async createBooking(input) {
       const store = load();
       const now = new Date().toISOString();

@@ -134,7 +134,7 @@ main { padding: 0 16px; }
 
 .toolbar { display: flex; gap: 0.5rem; padding: 0.75rem 0; align-items: center; }
 .toolbar input[type="date"] { width: auto; flex: 1; max-width: 200px; }
-.toolbar button:last-child { margin-left: auto; }
+.toolbar-right { margin-left: auto; display: flex; gap: 0.5rem; }
 
 .summary { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; color: var(--ink-2); font-size: 0.95rem; padding-bottom: 0.5rem; }
 .summary b { color: var(--ink); }
@@ -308,6 +308,8 @@ a.icon-btn { font-size: 1.15rem; }
   .weekday { display: block; margin: 0; font-size: 1rem; }
   .roc { display: none; }
   .toolbar { flex-wrap: wrap; }
+  .toolbar-right { width: 100%; }
+  .toolbar-right button { flex: 1; }
   .ledger-head { display: none; }
   .row-main {
     grid-template-columns: 4.2rem 1fr;
@@ -332,3 +334,15 @@ a.icon-btn { font-size: 1.15rem; }
 .confirm-backdrop { z-index: 30; }
 .confirm-box { max-width: 380px; padding: 1.25rem; }
 .confirm-text { white-space: pre-line; margin: 0 0 1rem; line-height: 1.7; }
+
+/* ---------- 休假設定 ---------- */
+.vacation-preview { font-size: 0.92rem; color: var(--ink-2); }
+.vacation-days { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.35rem; }
+.vacation-days span { background: var(--red-soft); color: var(--red); border-radius: 6px; padding: 0.1rem 0.45rem; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.vacation-warn { background: var(--amber-soft); color: var(--amber); border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 0.92rem; }
+.vacation-warn ul { margin: 0.35rem 0 0; padding-left: 1.2rem; color: var(--ink); }
+.vacation-list { border-top: 1px solid var(--rule); padding-top: 0.6rem; }
+.vacation-list h3 { font-family: var(--serif); font-size: 1rem; margin: 0 0 0.4rem; }
+.vacation-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.vacation-list li { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.vacation-list small { color: var(--ink-2); }
