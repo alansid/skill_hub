@@ -42,13 +42,14 @@ export function SearchPage({ onOpenDate }: { onOpenDate: (date: string) => void 
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="輸入姓名或電話，例如「王」「小明」或手機後 3 碼"
+          placeholder="姓名或手機後 3 碼"
           autoFocus
         />
         <button className="primary" type="submit" disabled={busy}>
           {busy ? '搜尋中…' : '搜尋'}
         </button>
       </form>
+      {!results && <p className="meta">例如：王、小明、678</p>}
       {error && <p className="error">{error}</p>}
       {results && results.length === 0 && <p className="meta">找不到符合的預約紀錄。</p>}
       {results && results.length >= 200 && <p className="meta">結果太多，只顯示前 200 筆，請輸入更完整的姓名或電話。</p>}
@@ -84,7 +85,7 @@ function ResultList({
             {b.isExtra && <em className="tag">加號</em>}
             {b.source === 'online' && <em className="tag online">線上</em>}
             {b.status === 'cancelled' && (
-              <em className="tag cancel">{b.cancelledBy === 'patient' ? '病人取消' : '已取消'}</em>
+              <em className="tag cancel">{b.cancelledBy === 'patient' ? '客人取消' : '已取消'}</em>
             )}
           </span>
           <span className="phone">{formatPhone(b.phone)}</span>

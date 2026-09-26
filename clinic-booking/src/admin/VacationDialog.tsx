@@ -94,10 +94,10 @@ export function VacationDialog({ startDate, settings, onClose, onSaved }: Props)
   async function save() {
     if (!valid) return setError('請選擇正確的開始與結束日期。');
     if (tooLong) return setError(`一次最多設定 ${MAX_DAYS} 天，請分段設定。`);
-    if (workDays.length === 0) return setError('這段期間本來就沒有看診日，不需要設定。');
+    if (workDays.length === 0) return setError('這段期間本來就沒有營業日，不需要設定。');
     if (affected.length > 0) {
       const ok = await askConfirm(
-        `這段期間還有 ${affected.length} 筆預約。\n設為休假後預約不會自動取消，請記得聯絡病人。確定要設定嗎？`,
+        `這段期間還有 ${affected.length} 筆預約。\n設為休假後預約不會自動取消，請記得聯絡客人。確定要設定嗎？`,
         '設定休假',
       );
       if (!ok) return;
@@ -116,7 +116,7 @@ export function VacationDialog({ startDate, settings, onClose, onSaved }: Props)
   }
 
   async function remove(v: Vacation) {
-    const ok = await askConfirm(`確定要取消 ${short(v.from)}～${short(v.to)} 的休假，恢復平常看診嗎？`, '恢復看診');
+    const ok = await askConfirm(`確定要取消 ${short(v.from)}～${short(v.to)} 的休假，恢復平常營業嗎？`, '恢復營業');
     if (!ok) return;
     setBusy(true);
     setError('');
@@ -133,7 +133,7 @@ export function VacationDialog({ startDate, settings, onClose, onSaved }: Props)
   return (
     <Modal title="休假設定" onClose={onClose}>
       <div className="form">
-        <p className="meta">選一段日期，這段期間的看診日會全部設為休診，病人就無法預約。</p>
+        <p className="meta">選一段日期，這段期間的營業日會全部設為休息，客人就無法預約。</p>
         <div className="form-row two">
           <label>
             從
@@ -145,7 +145,7 @@ export function VacationDialog({ startDate, settings, onClose, onSaved }: Props)
           </label>
         </div>
         <label>
-          說明（只有診所看得到）
+          說明（只有管理員看得到）
           <input id="vacation-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={100} />
         </label>
 
@@ -153,7 +153,7 @@ export function VacationDialog({ startDate, settings, onClose, onSaved }: Props)
           <div className="vacation-preview">
             {workDays.length > 0 ? (
               <>
-                會設為休診的看診日（{workDays.length} 天）：
+                會設為休息的營業日（{workDays.length} 天）：
                 <div className="vacation-days">
                   {workDays.map((d) => (
                     <span key={d}>{short(d)}</span>
@@ -161,14 +161,14 @@ export function VacationDialog({ startDate, settings, onClose, onSaved }: Props)
                 </div>
               </>
             ) : (
-              '這段期間本來就沒有看診日。'
+              '這段期間本來就沒有營業日。'
             )}
           </div>
         )}
 
         {affected.length > 0 && (
           <div className="vacation-warn">
-            <b>⚠ 這段期間還有 {affected.length} 筆預約，請記得聯絡病人：</b>
+            <b>⚠ 這段期間還有 {affected.length} 筆預約，請記得聯絡客人：</b>
             <ul>
               {affected.map((b) => (
                 <li key={b.id}>
@@ -191,9 +191,9 @@ export function VacationDialog({ startDate, settings, onClose, onSaved }: Props)
         </div>
 
         <div className="vacation-list">
-          <h3>已排定的休診</h3>
+          <h3>已排定的休息日</h3>
           {existing.length === 0 ? (
-            <p className="meta">目前沒有排定的休診。</p>
+            <p className="meta">目前沒有排定的休息日。</p>
           ) : (
             <ul>
               {existing.map((v) => (
@@ -203,7 +203,7 @@ export function VacationDialog({ startDate, settings, onClose, onSaved }: Props)
                     {v.note && <small>　{v.note}</small>}
                   </span>
                   <button type="button" onClick={() => void remove(v)} disabled={busy}>
-                    恢復看診
+                    恢復營業
                   </button>
                 </li>
               ))}

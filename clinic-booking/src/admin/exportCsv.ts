@@ -25,7 +25,7 @@ export async function exportCsv(bookings: Booking[]) {
     b.name,
     formatPhone(b.phone),
     b.note,
-    b.status === 'cancelled' ? (b.cancelledBy === 'patient' ? '病人取消' : '已取消') : '已預約',
+    b.status === 'cancelled' ? (b.cancelledBy === 'patient' ? '客人取消' : '已取消') : '已預約',
     b.isExtra ? '是' : '',
     b.source === 'online' ? '線上' : '櫃台',
     taipeiTime(b.createdAt),

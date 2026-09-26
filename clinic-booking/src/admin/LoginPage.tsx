@@ -13,7 +13,7 @@ export function LoginPage({ onLogin }: { onLogin: (user: string) => void }) {
     setError('');
     try {
       await api.signIn(password);
-      onLogin((await api.currentUser()) ?? '診所');
+      onLogin((await api.currentUser()) ?? '管理員');
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -24,12 +24,12 @@ export function LoginPage({ onLogin }: { onLogin: (user: string) => void }) {
   return (
     <div className="login">
       <form className="login-card" onSubmit={submit}>
-        <h1>任老師中醫</h1>
-        <p className="login-sub">預約登記本・診所人員登入</p>
+        <h1>任老師</h1>
+        <p className="login-sub">預約登記本・管理員登入</p>
         {/* 隱藏的帳號欄位，讓瀏覽器可以記住密碼 */}
-        <input type="text" name="username" autoComplete="username" value="任老師中醫" readOnly hidden />
+        <input type="text" name="username" autoComplete="username" value="任老師" readOnly hidden />
         <label>
-          診所密碼
+          管理員密碼
           <input
             id="login-password"
             type="password"

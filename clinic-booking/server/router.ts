@@ -265,7 +265,7 @@ function checkBookingFields(b: Record<string, unknown>, partial: boolean) {
 }
 
 const ADMIN_ROUTES: Record<string, Route> = {
-  'GET /api/admin/me': async () => json({ user: '診所' }),
+  'GET /api/admin/me': async () => json({ user: '管理員' }),
 
   'POST /api/admin/logout': async (req, env) => {
     const token = readCookie(req, SESSION_COOKIE);

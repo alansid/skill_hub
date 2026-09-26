@@ -11,7 +11,7 @@ export const DEFAULT_SLOTS = [
 export const DEFAULT_OPEN_WEEKDAYS = [0, 2, 3, 4, 6];
 
 export const DEFAULT_SETTINGS: ClinicSettings = {
-  clinicName: '任老師中醫',
+  clinicName: '任老師',
   clinicPhone: '02-23022457',
   openWeekdays: DEFAULT_OPEN_WEEKDAYS,
   slots: DEFAULT_SLOTS,

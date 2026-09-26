@@ -75,7 +75,7 @@ export function createDemoApi(): AdminApi {
     },
     async signIn(password) {
       if (password !== DEMO_PASSWORD) throw new Error('密碼錯誤');
-      setItem(USER_KEY, '診所');
+      setItem(USER_KEY, '管理員');
     },
     async signOut() {
       setItem(USER_KEY, null);

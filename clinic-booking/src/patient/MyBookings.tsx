@@ -96,7 +96,7 @@ export function MyBookings({
       {message && <p className="ok-msg">{message}</p>}
       {error && <p className="error">{error}</p>}
       {list && list.length === 0 && (
-        <p className="p-muted">這支手機目前沒有尚未看診的預約。</p>
+        <p className="p-muted">這支手機目前沒有預約。</p>
       )}
       {list && list.length > 0 && (
         <ul className="my-list">
@@ -123,7 +123,7 @@ export function MyBookings({
         </ul>
       )}
       <p className="p-muted small">
-        只會顯示尚未看診的預約。如需更改時間，請取消後重新預約，或來電 {clinicPhone}。
+        只會顯示還沒到的預約。如需更改時間，請取消後重新預約，或來電 {clinicPhone}。
       </p>
       <button className="wide" onClick={onBookNew}>
         回到預約

@@ -14,8 +14,8 @@ const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
   too_far: '這個日期超過可預約的範圍，請選擇較近的日期。',
   too_late: '這個時段已經過了或即將開始，請選擇其他時段。',
   slot_taken: '很抱歉，這個時段剛剛被預約走了，請選擇其他時段。',
-  already_booked_that_day: '這位病人在這一天已經有預約了。如需更改，請來電告知。',
-  too_many: '這支手機已經有多筆尚未看診的預約。如需再預約，請來電。',
+  already_booked_that_day: '這位客人在這一天已經有預約了。如需更改，請來電告知。',
+  too_many: '這支手機已經有多筆還沒到的預約。如需再預約，請來電。',
 };
 
 const PERIODS: Period[] = ['上午', '下午', '晚上'];
@@ -166,7 +166,7 @@ export function PatientApp() {
 
   const notice = (
     <p className="notice">
-      為免耽誤其他病人時間，敬請準時，任何延誤務必來電告知（{phoneLink}）
+      為免耽誤其他客人時間，敬請準時，任何延誤務必來電告知（{phoneLink}）
     </p>
   );
 
@@ -176,7 +176,7 @@ export function PatientApp() {
         <div className="demo-banner">示範模式：資料只存在這台裝置的瀏覽器，不會上網。</div>
       )}
       <header className="p-header">
-        <h1>{config?.clinicName ?? '任老師中醫'}</h1>
+        <h1>{config?.clinicName ?? '任老師'}</h1>
         <p>線上預約</p>
       </header>
 
@@ -275,7 +275,7 @@ export function PatientApp() {
               </div>
             )}
             {filteredDays && rangeActive && filteredDays.length === 0 && (
-              <p className="p-muted">這段期間沒有看診日，請換一段日期。</p>
+              <p className="p-muted">這段期間沒有營業日，請換一段日期。</p>
             )}
             {filteredDays && (
               <DateGrid
@@ -288,7 +288,7 @@ export function PatientApp() {
             )}
             {config && (
               <p className="p-muted small">
-                可預約今天起 {config.bookingWindowDays} 天內的日期；只顯示看診日。
+                可預約今天起 {config.bookingWindowDays} 天內的日期；只顯示營業日。
               </p>
             )}
           </section>
@@ -377,7 +377,7 @@ export function PatientApp() {
                 <button className="primary wide" type="submit" disabled={busy}>
                   {busy ? '送出中…' : '確認預約'}
                 </button>
-                <p className="p-muted small">您的資料僅供本診所預約聯絡使用。</p>
+                <p className="p-muted small">您的資料僅供預約聯絡使用。</p>
               </form>
             </section>
           )}
@@ -387,7 +387,7 @@ export function PatientApp() {
         </>
       )}
       <footer className="p-footer">
-        {config?.clinicName ?? '任老師中醫'}・電話 {phoneLink}
+        {config?.clinicName ?? '任老師'}・電話 {phoneLink}
       </footer>
     </div>
   );

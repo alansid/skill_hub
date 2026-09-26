@@ -73,9 +73,9 @@ export function DayPage({ date, setDate, settings }: Props) {
 
   let statusText = '';
   if (!schedule.open) {
-    statusText = schedule.overridden ? '臨時休診' : '本日休診';
+    statusText = schedule.overridden ? '臨時休息' : '本日休息';
   } else if (schedule.overridden) {
-    statusText = schedule.regularOpen ? '本日只開部分時段' : '本日特別開診';
+    statusText = schedule.regularOpen ? '本日只開部分時段' : '本日特別營業';
   }
 
   let lastPeriod = '';
@@ -83,7 +83,7 @@ export function DayPage({ date, setDate, settings }: Props) {
   return (
     <div className="day-page">
       <section className="page-head">
-        <button className="nav-btn" onClick={() => go(-1)} aria-label="前一個看診日">
+        <button className="nav-btn" onClick={() => go(-1)} aria-label="前一個營業日">
           ‹<span>前一天</span>
         </button>
         <div className="date-block">
@@ -96,7 +96,7 @@ export function DayPage({ date, setDate, settings }: Props) {
             <span className="roc">民國{rocYear(date)}年</span>
           </div>
         </div>
-        <button className="nav-btn" onClick={() => go(1)} aria-label="下一個看診日">
+        <button className="nav-btn" onClick={() => go(1)} aria-label="下一個營業日">
           <span>後一天</span>›
         </button>
       </section>
@@ -112,7 +112,7 @@ export function DayPage({ date, setDate, settings }: Props) {
           aria-label="選擇日期"
         />
         <span className="toolbar-right">
-          <button onClick={() => setShowSettings(true)}>本日看診設定</button>
+          <button onClick={() => setShowSettings(true)}>本日營業設定</button>
           <button onClick={() => setShowVacation(true)}>休假設定</button>
         </span>
       </section>
@@ -139,7 +139,7 @@ export function DayPage({ date, setDate, settings }: Props) {
       {loadError && <p className="error">{loadError}</p>}
 
       {!schedule.open && activeCount > 0 && (
-        <p className="error">⚠ 這天休診，但還有 {activeCount} 筆預約，請記得聯絡病人。</p>
+        <p className="error">⚠ 這天休息，但還有 {activeCount} 筆預約，請記得聯絡客人。</p>
       )}
 
       <div className="ledger" role="table">
@@ -266,7 +266,7 @@ function BookingRow({
           {b.name}
           {b.isExtra && <em className="tag">加號</em>}
           {b.source === 'online' && <em className="tag online">線上</em>}
-          {cancelled && <em className="tag cancel">{b.cancelledBy === 'patient' ? '病人取消' : '已取消'}</em>}
+          {cancelled && <em className="tag cancel">{b.cancelledBy === 'patient' ? '客人取消' : '已取消'}</em>}
         </span>
         {canDial && b.phone && !cancelled ? (
           <a

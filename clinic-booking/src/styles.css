@@ -294,6 +294,7 @@ a.icon-btn { font-size: 1.15rem; }
 /* ---------- 搜尋 ---------- */
 .search-bar { display: flex; gap: 0.5rem; padding: 1rem 0; }
 .search-bar input { flex: 1; min-width: 0; }
+.search-bar input::placeholder { font-size: 0.9em; }
 .search-bar button, .lookup button { flex-shrink: 0; white-space: nowrap; min-width: 4.5rem; height: 44px; }
 .results h3 { font-family: var(--serif); font-size: 1rem; color: var(--ink-2); margin: 1rem 0 0.4rem; }
 .result {

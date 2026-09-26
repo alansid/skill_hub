@@ -134,7 +134,7 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
     } catch (e) {
       if (e instanceof SlotTakenError) {
         setRestoreConflict(true);
-        setError(`${existing.slot} 已經有其他病人了。如果還是要讓「${existing.name}」這個時間來，請按下方的「以加號恢復」。`);
+        setError(`${existing.slot} 已經有其他客人了。如果還是要讓「${existing.name}」這個時間來，請按下方的「以加號恢復」。`);
       } else {
         setError((e as Error).message);
       }
@@ -204,20 +204,20 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
             placeholder={`例如 ${slot.slice(0, 3)}50`}
             inputMode="numeric"
           />
-          <small>病人不是準時在「{slot}」來，才需要填</small>
+          <small>客人不是準時在「{slot}」來，才需要填</small>
         </label>
         <label className="checkbox">
           <input type="checkbox" checked={isExtra} onChange={(e) => setIsExtra(e.target.checked)} />
-          加號（這個時段已經有其他病人）
+          加號（這個時段已經有其他客人）
         </label>
 
         {existing && (
           <p className="meta">
-            {existing.source === 'online' ? '病人線上預約' : '櫃台登記'}・建立於 {taipeiTime(existing.createdAt)}
+            {existing.source === 'online' ? '客人線上預約' : '櫃台登記'}・建立於 {taipeiTime(existing.createdAt)}
             {existing.updatedAt !== existing.createdAt && <>・最後修改 {taipeiTime(existing.updatedAt)}</>}
             {existing.cancelledAt && (
               <>
-                ・{existing.cancelledBy === 'patient' ? '病人線上取消' : '取消'}於 {taipeiTime(existing.cancelledAt)}
+                ・{existing.cancelledBy === 'patient' ? '客人線上取消' : '取消'}於 {taipeiTime(existing.cancelledAt)}
               </>
             )}
           </p>

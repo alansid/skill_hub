@@ -16,10 +16,10 @@ function Preview() {
     <>
       <div className="preview-switch" role="tablist">
         <button role="tab" aria-selected={tab === 'patient'} onClick={() => setTab('patient')}>
-          病人預約頁
+          客人預約頁
         </button>
         <button role="tab" aria-selected={tab === 'admin'} onClick={() => setTab('admin')}>
-          診所管理頁
+          管理頁
         </button>
       </div>
       {tab === 'patient' ? <PatientApp /> : <AdminApp />}

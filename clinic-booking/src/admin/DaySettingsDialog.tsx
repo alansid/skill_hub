@@ -43,13 +43,13 @@ export function DaySettingsDialog({ date, settings, override, activeCount, onClo
 
   async function save() {
     if (mode === 'partial' && slots.length === 0) {
-      setError('請至少勾選一個時段；若整天不看診，請選「臨時休診」。');
+      setError('請至少勾選一個時段；若整天不營業，請選「臨時休息」。');
       return;
     }
     if (mode === 'closed' && activeCount > 0) {
       const ok = await askConfirm(
-        `這天還有 ${activeCount} 筆預約，設為休診後預約不會自動取消，請記得聯絡病人。確定嗎？`,
-        '設為休診',
+        `這天還有 ${activeCount} 筆預約，設為休息後預約不會自動取消，請記得聯絡客人。確定嗎？`,
+        '設為休息',
       );
       if (!ok) return;
     }
@@ -76,23 +76,23 @@ export function DaySettingsDialog({ date, settings, override, activeCount, onClo
   }
 
   return (
-    <Modal title="本日看診設定" onClose={onClose}>
+    <Modal title="本日營業設定" onClose={onClose}>
       <div className="form">
         <p className="meta">
           {formatGregorian(date)} {weekdayName(date)}・平常這天
-          {regular.open ? '有看診' : '休診'}
+          {regular.open ? '有營業' : '休息'}
         </p>
         <label className="radio">
           <input type="radio" checked={mode === 'regular'} onChange={() => setMode('regular')} />
-          照平常（{regular.open ? '全部時段開放' : '休診'}）
+          照平常（{regular.open ? '全部時段開放' : '休息'}）
         </label>
         <label className="radio">
           <input type="radio" checked={mode === 'closed'} onChange={() => setMode('closed')} />
-          臨時休診
+          臨時休息
         </label>
         <label className="radio">
           <input type="radio" checked={mode === 'partial'} onChange={() => setMode('partial')} />
-          {regular.open ? '只開部分時段' : '特別開診（自選時段）'}
+          {regular.open ? '只開部分時段' : '特別營業（自選時段）'}
         </label>
 
         {mode === 'partial' && (
@@ -112,14 +112,14 @@ export function DaySettingsDialog({ date, settings, override, activeCount, onClo
                   ))}
               </div>
             ))}
-            <small>病人預約頁只會顯示勾選的時段。</small>
+            <small>客人預約頁只會顯示勾選的時段。</small>
           </div>
         )}
 
         {mode !== 'regular' && (
           <label>
-            說明（選填，只有診所看得到）
-            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="例如：醫師進修" maxLength={100} />
+            說明（選填，只有管理員看得到）
+            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="例如：外出進修" maxLength={100} />
           </label>
         )}
 
