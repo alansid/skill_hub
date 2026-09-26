@@ -125,6 +125,7 @@ export type BookResult =
   | 'too_far'
   | 'too_late'
   | 'slot_taken'
+  /** 同一支手機、同一個姓名，當天已經有預約（家人共用手機可以各約一個時段） */
   | 'already_booked_that_day'
   | 'too_many';
 

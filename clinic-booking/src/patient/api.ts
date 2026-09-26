@@ -52,7 +52,7 @@ function createDemoPatientApi(): PatientApi {
       const digits = normalizePhone(phone);
       const list = active();
       if (list.some((b) => b.date === date && b.slot === slot)) return 'slot_taken';
-      if (list.some((b) => b.date === date && b.phone === digits)) return 'already_booked_that_day';
+      if (list.some((b) => b.date === date && b.phone === digits && b.name === name.trim())) return 'already_booked_that_day';
       const today = todayInTaipei();
       const mine = list.filter((b) => b.phone === digits && b.source === 'online' && b.date >= today);
       if (mine.length >= settings.maxOnlinePerPhone) return 'too_many';

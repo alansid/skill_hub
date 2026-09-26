@@ -14,7 +14,7 @@ const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
   too_far: '這個日期超過可預約的範圍，請選擇較近的日期。',
   too_late: '這個時段已經過了或即將開始，請選擇其他時段。',
   slot_taken: '很抱歉，這個時段剛剛被預約走了，請選擇其他時段。',
-  already_booked_that_day: '這支手機在這一天已經有預約了。如需更改，請來電告知。',
+  already_booked_that_day: '這位病人在這一天已經有預約了。如需更改，請來電告知。',
   too_many: '這支手機已經有多筆尚未看診的預約。如需再預約，請來電。',
 };
 
