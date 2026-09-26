@@ -87,7 +87,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible {
 .hint { text-align: center; font-size: 0.85rem; color: var(--ink-2); margin: 0; }
 
 /* ---------- 頂部 ---------- */
-.app { max-width: 1000px; margin: 0 auto; padding-bottom: 3rem; }
+.app { margin: 0 auto; padding-bottom: 3rem; }
 .topbar {
   position: sticky;
   top: 0;
@@ -361,3 +361,20 @@ a.icon-btn { font-size: 1.15rem; }
 .vacation-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
 .vacation-list li { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .vacation-list small { color: var(--ink-2); }
+
+/* ---------- 電腦版：滿版，欄位加寬 ---------- */
+@media (min-width: 900px) {
+  .topbar { padding: 0.6rem 32px; }
+  main { padding: 0 32px; }
+  .ledger-head, .row-main {
+    grid-template-columns: 8rem minmax(8rem, 1fr) 11rem minmax(10rem, 2.2fr);
+    gap: 1.25rem;
+  }
+  .row.empty .time { width: 8rem; }
+  .row-main, .row.empty { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .ledger-head { padding-left: 1.5rem; }
+  .period { padding-left: 1.5rem; }
+  .gregorian { font-size: 1.7rem; }
+  .result { grid-template-columns: 15rem 12rem 12rem 1fr; }
+  .result .note { grid-column: auto; }
+}

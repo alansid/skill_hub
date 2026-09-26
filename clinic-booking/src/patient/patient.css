@@ -117,3 +117,25 @@
 .range-row input { min-width: 0; }
 .link-btn { justify-self: start; border: none; background: none; padding: 0; min-height: 32px; color: var(--red); text-decoration: underline; }
 .phone-text { white-space: nowrap; }
+
+/* ---------- 版面：手機上下排列，電腦左右兩欄滿版 ---------- */
+.book-layout { display: block; }
+.p-placeholder { display: none; }
+
+@media (min-width: 900px) {
+  .patient { max-width: 1280px; padding: 0 32px 2rem; }
+  .p-header { padding-top: 2rem; }
+  .p-tabs { max-width: 520px; margin-left: auto; margin-right: auto; }
+  .book-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(380px, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .book-layout .p-card { margin: 0 0 1rem; }
+  .book-right { position: sticky; top: 1rem; }
+  .p-placeholder { display: block; color: var(--ink-2); text-align: center; padding: 3rem 1.5rem; border-style: dashed; }
+  .date-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
+  /* 成功畫面、查詢頁不需要那麼寬 */
+  .success, .patient > .p-card { max-width: 640px; margin-left: auto; margin-right: auto; }
+}

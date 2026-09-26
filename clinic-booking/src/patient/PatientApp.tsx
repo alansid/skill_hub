@@ -233,6 +233,9 @@ export function PatientApp() {
         <>
           {notice}
 
+          {/* 電腦版：左邊選日期，右邊選時段、填資料；手機版上下排列 */}
+          <div className="book-layout">
+          <div className="book-left">
           <section className="p-card">
             <h2>
               <span className="step">1</span>選擇日期
@@ -289,7 +292,14 @@ export function PatientApp() {
               </p>
             )}
           </section>
+          </div>
 
+          <div className="book-right">
+          {!date && (
+            <section className="p-card p-placeholder">
+              <p>請先在{'\u00a0'}<b>選擇日期</b>{'\u00a0'}挑一天，這裡會顯示可以預約的時段。</p>
+            </section>
+          )}
           {date && (
             <section className="p-card" ref={slotRef}>
               <h2>
@@ -372,6 +382,8 @@ export function PatientApp() {
             </section>
           )}
           {error && !slot && <p className="error">{error}</p>}
+          </div>
+          </div>
         </>
       )}
       <footer className="p-footer">
