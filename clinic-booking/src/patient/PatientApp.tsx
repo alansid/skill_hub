@@ -39,9 +39,9 @@ export function PatientApp() {
   const [done, setDone] = useState<Done | null>(null);
   const [view, setView] = useState<'book' | 'mine'>('book');
   const [lookupPhone, setLookupPhone] = useState('');
-  // 時段篩選：null = 不限
-  const [period, setPeriod] = useState<Period | null>(null);
-  const [time, setTime] = useState<string | null>(null);
+  // 病人想約的日期區間（空白 = 不限）
+  const [rangeFrom, setRangeFrom] = useState('');
+  const [rangeTo, setRangeTo] = useState('');
   const slotRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLElement>(null);
 
@@ -65,31 +65,26 @@ export function PatientApp() {
 
   const phoneText = config?.clinicPhone ?? '02-23022457';
   const phoneHref = 'tel:' + phoneText.replace(/\D/g, '');
-  // 所有出現過的時段（用來列出可篩選的時間）
-  const allTimes = useMemo(
-    () => [...new Set((days ?? []).flatMap((d) => d.available))].sort(),
-    [days],
-  );
-  // 依篩選條件，只留下符合的空時段
+  const minDate = config?.today ?? '';
+  const maxDate = config ? addDays(config.today, config.bookingWindowDays) : '';
+  const rangeActive = Boolean(rangeFrom || rangeTo);
+  // 只留下日期區間內的看診日
   const filteredDays = useMemo(
     () =>
-      days?.map((d) => ({
-        ...d,
-        available: d.available.filter((s) => (!period || periodOf(s) === period) && (!time || s === time)),
-      })) ?? null,
-    [days, period, time],
+      days?.filter((d) => (!rangeFrom || d.date >= rangeFrom) && (!rangeTo || d.date <= rangeTo)) ?? null,
+    [days, rangeFrom, rangeTo],
   );
-  const selectedDay = filteredDays?.find((d) => d.date === date) ?? null;
+  const selectedDay = days?.find((d) => d.date === date) ?? null;
 
-  function choosePeriod(p: Period | null) {
-    setPeriod(p);
-    setTime(null);
-    setSlot(null);
-  }
-
-  function chooseTime(t: string | null) {
-    setTime(t);
-    setSlot(null);
+  function changeRange(from: string, to: string) {
+    // 結束日早於開始日時，自動對調
+    if (from && to && to < from) [from, to] = [to, from];
+    setRangeFrom(from);
+    setRangeTo(to);
+    if (date && ((from && date < from) || (to && date > to))) {
+      setDate(null);
+      setSlot(null);
+    }
   }
 
   function pickDate(d: string) {
@@ -230,43 +225,48 @@ export function PatientApp() {
             {!days && !loadError && <p className="p-muted">載入中…</p>}
             {days && days.length === 0 && <p className="p-muted">目前沒有可預約的日期，請來電預約。</p>}
             {days && days.length > 0 && (
-              <div className="filter">
-                <span className="filter-label">想約的時段</span>
-                <div className="filter-row">
-                  <button className={'chip-btn' + (period === null ? ' on' : '')} onClick={() => choosePeriod(null)}>
-                    不限
-                  </button>
-                  {PERIODS.map((p) => (
-                    <button
-                      key={p}
-                      className={'chip-btn' + (period === p ? ' on' : '')}
-                      onClick={() => choosePeriod(p)}
-                    >
-                      {p}
-                    </button>
-                  ))}
+              <div className="range">
+                <span className="range-label">想約的日期（可不填）</span>
+                <div className="range-row">
+                  <input
+                    id="range-from"
+                    type="date"
+                    value={rangeFrom}
+                    min={minDate}
+                    max={maxDate}
+                    onChange={(e) => changeRange(e.target.value, rangeTo)}
+                    aria-label="開始日期"
+                  />
+                  <span>到</span>
+                  <input
+                    id="range-to"
+                    type="date"
+                    value={rangeTo}
+                    min={rangeFrom || minDate}
+                    max={maxDate}
+                    onChange={(e) => changeRange(rangeFrom, e.target.value)}
+                    aria-label="結束日期"
+                  />
                 </div>
-                {period && (
-                  <div className="filter-row">
-                    <button className={'chip-btn small' + (time === null ? ' on' : '')} onClick={() => chooseTime(null)}>
-                      {period}都可以
-                    </button>
-                    {allTimes
-                      .filter((t) => periodOf(t) === period)
-                      .map((t) => (
-                        <button
-                          key={t}
-                          className={'chip-btn small' + (time === t ? ' on' : '')}
-                          onClick={() => chooseTime(t)}
-                        >
-                          {t}
-                        </button>
-                      ))}
-                  </div>
+                {rangeActive && (
+                  <button className="link-btn" onClick={() => changeRange('', '')}>
+                    清除，顯示全部日期
+                  </button>
                 )}
               </div>
             )}
-            {filteredDays && <DateGrid days={filteredDays} selected={date} onPick={pickDate} />}
+            {filteredDays && rangeActive && filteredDays.length === 0 && (
+              <p className="p-muted">這段期間沒有看診日，請換一段日期。</p>
+            )}
+            {filteredDays && (
+              <DateGrid
+                key={rangeFrom + rangeTo}
+                days={filteredDays}
+                selected={date}
+                onPick={pickDate}
+                showAllInitially={rangeActive}
+              />
+            )}
             {config && (
               <p className="p-muted small">
                 可預約今天起 {config.bookingWindowDays} 天內的日期；只顯示看診日。
@@ -282,7 +282,6 @@ export function PatientApp() {
                   {formatGregorian(date)} {weekdayName(date)}
                 </small>
               </h2>
-              {(period || time) && <p className="p-muted small filter-note">只顯示「{time ?? period}」的時段，要看其他時段請在上方改成「不限」。</p>}
               {selectedDay && selectedDay.available.length > 0 ? (
                 PERIODS.map((p) => {
                   const list = selectedDay.available.filter((s) => periodOf(s) === p);
@@ -370,12 +369,14 @@ function DateGrid({
   days,
   selected,
   onPick,
+  showAllInitially = false,
 }: {
   days: DayAvailability[];
   selected: string | null;
   onPick: (d: string) => void;
+  showAllInitially?: boolean;
 }) {
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(showAllInitially);
   const visible = showAll ? days : days.slice(0, 15);
   const months: { key: string; items: DayAvailability[] }[] = [];
   for (const d of visible) {
