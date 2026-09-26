@@ -41,12 +41,17 @@ button.primary { background: var(--red); border-color: var(--red); color: #fff; 
 button.danger { color: var(--red); border-color: var(--red); background: #fff; }
 input, select, textarea {
   width: 100%;
+  accent-color: var(--red);
   border: 1px solid var(--rule);
   border-radius: 8px;
   padding: 0.5rem 0.65rem;
   background: #fff;
   min-height: 42px;
 }
+/* 輸入框、下拉選單一樣高，排起來才整齊 */
+input:not([type='checkbox']):not([type='radio']), select { height: 44px; min-height: 44px; }
+select { padding-block: 0; }
+input[type='checkbox'], input[type='radio'] { accent-color: var(--red); }
 input:focus, select:focus, textarea:focus, button:focus-visible {
   outline: 2px solid var(--red);
   outline-offset: 1px;
@@ -96,6 +101,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible {
   border-bottom: 1px solid var(--rule);
 }
 .brand {
+  min-height: 40px;
   border: none;
   background: none;
   padding: 0;
@@ -104,7 +110,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible {
   font-weight: 700;
   color: var(--red);
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.4rem;
   white-space: nowrap;
 }
@@ -160,7 +166,7 @@ main { padding: 0 16px; }
 }
 .ledger-head {
   padding: 0.5rem 1rem;
-  padding-right: calc(52px + 4.5rem + 1rem);
+  padding-right: calc(4.5rem + 1rem);
   font-size: 0.85rem;
   color: var(--ink-2);
   border-bottom: 1px solid var(--rule);
@@ -194,6 +200,10 @@ main { padding: 0 16px; }
 .row.empty { display: flex; align-items: center; gap: 0.75rem; width: 100%; border-bottom: 1px solid var(--rule); }
 .row.empty .time { width: 7.5rem; }
 .row-main:hover, .row.empty:hover { background: #fff; }
+.row.empty:hover { border-color: transparent; border-bottom-color: var(--rule); }
+.row-main { cursor: pointer; }
+.row-main:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+.phone-link { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
 .time { font-family: var(--serif); font-weight: 700; font-variant-numeric: tabular-nums; }
 .time s { color: var(--ink-3); font-weight: 400; margin-right: 0.2rem; }
 .empty-label { color: var(--ink-3); }
@@ -255,6 +265,9 @@ a.icon-btn { font-size: 1.15rem; }
 .form { display: grid; gap: 0.8rem; }
 .form label { display: grid; gap: 0.25rem; font-size: 0.9rem; color: var(--ink-2); }
 .form label small { color: var(--ink-3); font-size: 0.8rem; }
+.label-line { display: flex; align-items: baseline; gap: 0.5rem; }
+.label-line em { font-style: normal; color: var(--red); }
+.form-row.two { align-items: end; }
 .form-row.two { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 .form .checkbox, .form .radio { display: flex; align-items: center; gap: 0.5rem; color: var(--ink); font-size: 1rem; cursor: pointer; }
 .form .checkbox input, .form .radio input { width: 1.2rem; height: 1.2rem; min-height: 0; margin: 0; }
@@ -280,11 +293,13 @@ a.icon-btn { font-size: 1.15rem; }
 
 /* ---------- 搜尋 ---------- */
 .search-bar { display: flex; gap: 0.5rem; padding: 1rem 0; }
+.search-bar input { flex: 1; min-width: 0; }
+.search-bar button, .lookup button { flex-shrink: 0; white-space: nowrap; min-width: 4.5rem; height: 44px; }
 .results h3 { font-family: var(--serif); font-size: 1rem; color: var(--ink-2); margin: 1rem 0 0.4rem; }
 .result {
   width: 100%;
   display: grid;
-  grid-template-columns: 13rem minmax(6rem, 1fr) 9rem;
+  grid-template-columns: 13rem 10rem 1fr;
   gap: 0.2rem 0.75rem;
   text-align: left;
   border-radius: 0;

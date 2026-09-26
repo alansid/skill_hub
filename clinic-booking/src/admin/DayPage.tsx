@@ -3,6 +3,7 @@ import { api } from '../data';
 import type { Booking, ClinicSettings, DayOverride } from '../data/types';
 import { addDays, formatGregorian, isValidDate, rocYear, todayInTaipei, weekdayName } from '../lib/dates';
 import { formatLunar } from '../lib/lunar';
+import { canDial } from '../lib/dial';
 import { formatPhone } from '../lib/phone';
 import { nextOpenDay, periodOf, scheduleFor } from '../lib/schedule';
 import { BookingDialog, type BookingDialogTarget } from './BookingDialog';
@@ -239,7 +240,19 @@ function BookingRow({
   const cancelled = b.status === 'cancelled';
   return (
     <div className={'row filled' + (cancelled ? ' cancelled' : '') + (b.isExtra ? ' extra' : '')}>
-      <button className="row-main" onClick={onClick}>
+      {/* 整列可點開修改；用 div 是因為裡面的電話號碼在手機上是可以撥打的連結 */}
+      <div
+        className="row-main"
+        role="button"
+        tabIndex={0}
+        onClick={onClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+          }
+        }}
+      >
         <span className="time">
           {b.time && b.time !== b.slot ? (
             <>
@@ -255,16 +268,20 @@ function BookingRow({
           {b.source === 'online' && <em className="tag online">線上</em>}
           {cancelled && <em className="tag cancel">{b.cancelledBy === 'patient' ? '病人取消' : '已取消'}</em>}
         </span>
-        <span className="phone">{formatPhone(b.phone)}</span>
+        {canDial && b.phone && !cancelled ? (
+          <a
+            className="phone phone-link"
+            href={`tel:${b.phone}`}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`打電話給${b.name}`}
+          >
+            {formatPhone(b.phone)}
+          </a>
+        ) : (
+          <span className="phone">{formatPhone(b.phone)}</span>
+        )}
         <span className="note">{b.note}</span>
-      </button>
-      {b.phone && !cancelled ? (
-        <a className="icon-btn" href={`tel:${b.phone}`} aria-label={`打電話給${b.name}`}>
-          ☎
-        </a>
-      ) : (
-        <span className="icon-btn placeholder" />
-      )}
+      </div>
       {onAddExtra ? (
         <button className="icon-btn add-extra" onClick={onAddExtra} aria-label="此時段加號">
           ＋加號

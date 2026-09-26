@@ -116,3 +116,4 @@
 .range-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: center; }
 .range-row input { min-width: 0; }
 .link-btn { justify-self: start; border: none; background: none; padding: 0; min-height: 32px; color: var(--red); text-decoration: underline; }
+.phone-text { white-space: nowrap; }

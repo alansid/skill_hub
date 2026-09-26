@@ -14,6 +14,8 @@ await build({
   define: {
     'import.meta.env.VITE_SUPABASE_URL': '""',
     'import.meta.env.VITE_SUPABASE_ANON_KEY': '""',
+    // 示範版不顯示撥號連結
+    'import.meta.env.VITE_PREVIEW': '"1"',
   },
   build: {
     outDir,

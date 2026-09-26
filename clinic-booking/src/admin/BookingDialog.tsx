@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { api } from '../data';
 import type { Booking, BookingPatch, ClinicSettings } from '../data/types';
 import { SlotTakenError } from '../data/types';
-import { formatGregorian, isValidDate, weekdayName } from '../lib/dates';
+import { isValidDate, weekdayName } from '../lib/dates';
 import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
 import { normalizeTime } from '../lib/schedule';
 import { askConfirm } from '../lib/askConfirm';
@@ -161,12 +161,13 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
       <form className="form" onSubmit={submit}>
         <div className="form-row two">
           <label>
-            日期
+            <span className="label-line">
+              日期{isValidDate(date) && <em>{weekdayName(date)}</em>}
+            </span>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-            {isValidDate(date) && <small>{formatGregorian(date)} {weekdayName(date)}</small>}
           </label>
           <label>
-            時段
+            <span className="label-line">時段</span>
             <select value={slot} onChange={(e) => setSlot(e.target.value)}>
               {slotOptions.map((s) => (
                 <option key={s} value={s}>
@@ -195,22 +196,20 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
           備註
           <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={500} />
         </label>
-        <div className="form-row two">
-          <label>
-            實際時間（選填）
-            <input
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              placeholder={`例如 ${slot.slice(0, 3)}50`}
-              inputMode="numeric"
-            />
-            <small>與時段不同時才需要填</small>
-          </label>
-          <label className="checkbox">
-            <input type="checkbox" checked={isExtra} onChange={(e) => setIsExtra(e.target.checked)} />
-            加號（此時段已有人）
-          </label>
-        </div>
+        <label>
+          實際時間（選填）
+          <input
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            placeholder={`例如 ${slot.slice(0, 3)}50`}
+            inputMode="numeric"
+          />
+          <small>病人不是準時在「{slot}」來，才需要填</small>
+        </label>
+        <label className="checkbox">
+          <input type="checkbox" checked={isExtra} onChange={(e) => setIsExtra(e.target.checked)} />
+          加號（這個時段已經有其他病人）
+        </label>
 
         {existing && (
           <p className="meta">

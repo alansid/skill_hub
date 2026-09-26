@@ -5,6 +5,7 @@ import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
 import { periodOf, type Period } from '../lib/schedule';
 import { patientApi, type BookResult, type BookingConfig, type DayAvailability } from './api';
 import { MyBookings } from './MyBookings';
+import { canDial } from '../lib/dial';
 
 const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
   invalid_name: '請填寫姓名。',
@@ -74,7 +75,12 @@ export function PatientApp() {
   }, [refresh]);
 
   const phoneText = config?.clinicPhone ?? '02-23022457';
-  const phoneHref = 'tel:' + phoneText.replace(/\D/g, '');
+  // 手機、平板上電話號碼可以直接點來撥打；電腦上只顯示號碼
+  const phoneLink = canDial ? (
+    <a href={'tel:' + phoneText.replace(/\D/g, '')}>{phoneText}</a>
+  ) : (
+    <b className="phone-text">{phoneText}</b>
+  );
   const minDate = config?.today ?? '';
   const maxDate = config ? addDays(config.today, config.bookingWindowDays) : '';
   const rangeActive = Boolean(rangeFrom || rangeTo);
@@ -160,7 +166,7 @@ export function PatientApp() {
 
   const notice = (
     <p className="notice">
-      為免耽誤其他病人時間，敬請準時，任何延誤務必來電告知（<a href={phoneHref}>{phoneText}</a>）
+      為免耽誤其他病人時間，敬請準時，任何延誤務必來電告知（{phoneLink}）
     </p>
   );
 
@@ -212,7 +218,7 @@ export function PatientApp() {
           {notice}
           <p className="p-muted">
             建議將此畫面截圖保存。如需取消，請點上方「查詢／取消預約」，輸入手機號碼即可；或來電{' '}
-            <a href={phoneHref}>{phoneText}</a>。
+            {phoneLink}。
           </p>
           <div className="success-actions">
             <button className="wide" onClick={() => openMine(formatPhone(done.phone))}>
@@ -369,7 +375,7 @@ export function PatientApp() {
         </>
       )}
       <footer className="p-footer">
-        {config?.clinicName ?? '任老師中醫'}・電話 <a href={phoneHref}>{phoneText}</a>
+        {config?.clinicName ?? '任老師中醫'}・電話 {phoneLink}
       </footer>
     </div>
   );
