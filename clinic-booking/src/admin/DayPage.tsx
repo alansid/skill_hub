@@ -188,9 +188,11 @@ export function DayPage({ date, setDate, settings }: Props) {
           target={dialog}
           settings={settings}
           onClose={() => setDialog(null)}
-          onSaved={() => {
+          onSaved={(movedTo) => {
             setDialog(null);
-            void load();
+            // 預約改到別天時，直接跳到那一天，讓人看到它搬到哪裡
+            if (movedTo && movedTo !== date) setDate(movedTo);
+            else void load();
           }}
         />
       )}

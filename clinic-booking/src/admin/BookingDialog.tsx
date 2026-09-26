@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { api } from '../data';
 import type { Booking, BookingPatch, ClinicSettings } from '../data/types';
+import { SlotTakenError } from '../data/types';
 import { formatGregorian, isValidDate, weekdayName } from '../lib/dates';
 import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
 import { normalizeTime } from '../lib/schedule';
@@ -15,7 +16,8 @@ interface Props {
   target: BookingDialogTarget;
   settings: ClinicSettings;
   onClose: () => void;
-  onSaved: () => void;
+  /** 儲存後呼叫；有傳日期代表預約被移到那一天 */
+  onSaved: (movedTo?: string) => void;
 }
 
 function taipeiTime(iso: string): string {
@@ -40,6 +42,8 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
   const [isExtra, setIsExtra] = useState(existing?.isExtra ?? (target.kind === 'new' && target.isExtra));
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  // 恢復預約時，原本的時段已經有其他病人
+  const [restoreConflict, setRestoreConflict] = useState(false);
 
   const cancelled = existing?.status === 'cancelled';
   const slotOptions = settings.slots.includes(slot) ? settings.slots : [...settings.slots, slot].sort();
@@ -75,12 +79,13 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
     };
   }
 
-  async function run(action: () => Promise<unknown>) {
+  async function run(action: () => Promise<unknown>, movedTo?: string) {
     setBusy(true);
     setError('');
+    setRestoreConflict(false);
     try {
       await action();
-      onSaved();
+      onSaved(movedTo);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -93,7 +98,7 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
     const data = validate();
     if (!data) return;
     if (existing) {
-      void run(() => api.updateBooking(existing.id, data));
+      void run(() => api.updateBooking(existing.id, data), data.date !== existing.date ? data.date : undefined);
     } else {
       void run(() =>
         api.createBooking({
@@ -119,9 +124,28 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
     void run(() => api.updateBooking(existing.id, { status: 'cancelled' }));
   }
 
-  function restoreBooking() {
+  async function restoreBooking() {
     if (!existing) return;
-    void run(() => api.updateBooking(existing.id, { status: 'booked' }));
+    setBusy(true);
+    setError('');
+    try {
+      await api.updateBooking(existing.id, { status: 'booked' });
+      onSaved();
+    } catch (e) {
+      if (e instanceof SlotTakenError) {
+        setRestoreConflict(true);
+        setError(`${existing.slot} 已經有其他病人了。如果還是要讓「${existing.name}」這個時間來，請按下方的「以加號恢復」。`);
+      } else {
+        setError((e as Error).message);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function restoreAsExtra() {
+    if (!existing) return;
+    void run(() => api.updateBooking(existing.id, { status: 'booked', isExtra: true }));
   }
 
   const title = existing
@@ -208,9 +232,14 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
               取消預約
             </button>
           )}
-          {existing && cancelled && (
-            <button type="button" onClick={restoreBooking} disabled={busy}>
+          {existing && cancelled && !restoreConflict && (
+            <button type="button" onClick={() => void restoreBooking()} disabled={busy}>
               恢復預約
+            </button>
+          )}
+          {existing && cancelled && restoreConflict && (
+            <button type="button" className="primary" onClick={restoreAsExtra} disabled={busy}>
+              以加號恢復
             </button>
           )}
           <span className="spacer" />

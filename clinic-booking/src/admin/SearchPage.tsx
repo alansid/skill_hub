@@ -13,7 +13,14 @@ export function SearchPage({ onOpenDate }: { onOpenDate: (date: string) => void 
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!query.trim()) return;
+    const q = query.trim();
+    if (!q) return;
+    // 只打 1～2 個數字時，電話比對不到，先提醒
+    if (/^\d{1,2}$/.test(q)) {
+      setResults(null);
+      setError('電話請至少輸入 3 個數字，例如後 3 碼。');
+      return;
+    }
     setBusy(true);
     setError('');
     try {
@@ -35,7 +42,7 @@ export function SearchPage({ onOpenDate }: { onOpenDate: (date: string) => void 
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="輸入姓名或電話（可只打部分，例如後三碼）"
+          placeholder="輸入姓名或電話，例如「王」「小明」或手機後 3 碼"
           autoFocus
         />
         <button className="primary" type="submit" disabled={busy}>

@@ -19,6 +19,9 @@ const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
 
 const PERIODS: Period[] = ['上午', '下午', '晚上'];
 
+/** 日期區間預設顯示幾天 */
+const DEFAULT_RANGE_DAYS = 30;
+
 interface Done {
   date: string;
   slot: string;
@@ -42,6 +45,7 @@ export function PatientApp() {
   // 病人想約的日期區間（空白 = 不限）
   const [rangeFrom, setRangeFrom] = useState('');
   const [rangeTo, setRangeTo] = useState('');
+  const rangeInitialized = useRef(false);
   const slotRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLElement>(null);
 
@@ -49,6 +53,12 @@ export function PatientApp() {
     try {
       const cfg = await patientApi.getConfig();
       setConfig(cfg);
+      // 第一次載入時，日期區間預設為「今天到 30 天後」
+      if (!rangeInitialized.current) {
+        rangeInitialized.current = true;
+        setRangeFrom(cfg.today);
+        setRangeTo(addDays(cfg.today, Math.min(DEFAULT_RANGE_DAYS, cfg.bookingWindowDays)));
+      }
       setDays(await patientApi.getAvailability(cfg.today, addDays(cfg.today, cfg.bookingWindowDays)));
       setLoadError('');
     } catch (e) {
@@ -226,7 +236,7 @@ export function PatientApp() {
             {days && days.length === 0 && <p className="p-muted">目前沒有可預約的日期，請來電預約。</p>}
             {days && days.length > 0 && (
               <div className="range">
-                <span className="range-label">想約的日期（可不填）</span>
+                <span className="range-label">想約的日期</span>
                 <div className="range-row">
                   <input
                     id="range-from"
@@ -248,9 +258,9 @@ export function PatientApp() {
                     aria-label="結束日期"
                   />
                 </div>
-                {rangeActive && (
-                  <button className="link-btn" onClick={() => changeRange('', '')}>
-                    清除，顯示全部日期
+                {rangeTo !== maxDate && (
+                  <button className="link-btn" onClick={() => changeRange(rangeFrom || minDate, maxDate)}>
+                    看更後面的日期（最多到 {Number(maxDate.slice(5, 7))}/{Number(maxDate.slice(8))}）
                   </button>
                 )}
               </div>
