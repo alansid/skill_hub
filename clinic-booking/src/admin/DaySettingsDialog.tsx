@@ -23,7 +23,7 @@ export function DaySettingsDialog({ date, settings, override, activeCount, onClo
   const regular = scheduleFor(date, settings, undefined);
   const [mode, setMode] = useState<Mode>(!override ? 'regular' : override.closed ? 'closed' : 'partial');
   const [slots, setSlots] = useState<string[]>(
-    override && !override.closed ? scheduleFor(date, settings, override).slots : settings.slots,
+    override && !override.closed ? scheduleFor(date, settings, override).slots : regular.open ? regular.slots : settings.slots,
   );
   const [note, setNote] = useState(override?.note ?? '');
   const [error, setError] = useState('');
@@ -84,7 +84,7 @@ export function DaySettingsDialog({ date, settings, override, activeCount, onClo
         </p>
         <label className="radio">
           <input type="radio" checked={mode === 'regular'} onChange={() => setMode('regular')} />
-          照平常（{regular.open ? '全部時段開放' : '休息'}）
+          照平常（{!regular.open ? '休息' : regular.slots.length === settings.slots.length ? '全部時段開放' : `${PERIODS.filter((p) => regular.slots.some((s) => periodOf(s) === p)).join('、')}開放`}）
         </label>
         <label className="radio">
           <input type="radio" checked={mode === 'closed'} onChange={() => setMode('closed')} />

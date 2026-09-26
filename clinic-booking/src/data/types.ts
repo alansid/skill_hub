@@ -5,6 +5,8 @@ export interface ClinicSettings {
   openWeekdays: number[];
   /** 所有時段，例如 '08:30' */
   slots: string[];
+  /** 某些星期幾平常只開部分時段（key 是星期幾，0 = 星期日）；沒列出的星期幾開放全部時段 */
+  weekdaySlots: Record<string, string[]>;
   /** 病人最多可以預約幾天內 */
   bookingWindowDays: number;
   /** 病人可否預約當天 */
@@ -125,8 +127,6 @@ export type BookResult =
   | 'too_far'
   | 'too_late'
   | 'slot_taken'
-  /** 同一支手機、同一個姓名，當天已經有預約（家人共用手機可以各約一個時段） */
-  | 'already_booked_that_day'
   | 'too_many';
 
 /** 病人查到的自己的預約（姓名已遮蔽） */

@@ -3,7 +3,8 @@ import type { Booking } from '../data/types';
 import { canPatientCancel, computeAvailability, myBookingsView, validateOnlineBooking } from './rules';
 import { DEFAULT_SETTINGS } from './schedule';
 
-const s = DEFAULT_SETTINGS;
+// 這裡測的是預約規則，不是各星期的時段，所以讓每個營業日都開全部時段
+const s = { ...DEFAULT_SETTINGS, weekdaySlots: {} };
 // 台灣時間 2026-09-29（週二）08:05
 const now = new Date('2026-09-29T00:05:00Z');
 

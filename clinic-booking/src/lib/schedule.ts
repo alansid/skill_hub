@@ -10,11 +10,20 @@ export const DEFAULT_SLOTS = [
 /** 週二、三、四、六、日看診（0 = 星期日） */
 export const DEFAULT_OPEN_WEEKDAYS = [0, 2, 3, 4, 6];
 
+/** 平日（週二、三、四）沒有上午時段 */
+const AFTERNOON_AND_EVENING = DEFAULT_SLOTS.filter((s) => s >= '12:00');
+export const DEFAULT_WEEKDAY_SLOTS: Record<string, string[]> = {
+  '2': AFTERNOON_AND_EVENING,
+  '3': AFTERNOON_AND_EVENING,
+  '4': AFTERNOON_AND_EVENING,
+};
+
 export const DEFAULT_SETTINGS: ClinicSettings = {
   clinicName: '任老師',
   clinicPhone: '02-23022457',
   openWeekdays: DEFAULT_OPEN_WEEKDAYS,
   slots: DEFAULT_SLOTS,
+  weekdaySlots: DEFAULT_WEEKDAY_SLOTS,
   bookingWindowDays: 90,
   sameDayBooking: true,
   minMinutesBeforeBooking: 30,
@@ -46,11 +55,13 @@ export function scheduleFor(
   settings: ClinicSettings,
   override: DayOverride | undefined,
 ): DaySchedule {
-  const regularOpen = settings.openWeekdays.includes(weekdayOf(date));
+  const weekday = weekdayOf(date);
+  const regularOpen = settings.openWeekdays.includes(weekday);
   if (!override) {
+    const regularSlots = settings.weekdaySlots?.[weekday] ?? settings.slots;
     return {
       open: regularOpen,
-      slots: regularOpen ? settings.slots : [],
+      slots: regularOpen ? settings.slots.filter((s) => regularSlots.includes(s)) : [],
       overridden: false,
       regularOpen,
     };

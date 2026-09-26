@@ -43,10 +43,11 @@ describe('電話', () => {
 
 describe('看診日與時段', () => {
   const s = DEFAULT_SETTINGS;
-  it('週一、週五休診，其他看診日開 11 個時段', () => {
+  it('週一、週五休診，週二開 6 個時段，週日開 11 個時段', () => {
     expect(scheduleFor('2026-09-28', s, undefined).open).toBe(false); // 一
     expect(scheduleFor('2026-10-02', s, undefined).open).toBe(false); // 五
-    expect(scheduleFor('2026-09-29', s, undefined).slots).toHaveLength(11); // 二
+    expect(scheduleFor('2026-09-29', s, undefined).slots).toHaveLength(6); // 二
+    expect(scheduleFor('2026-09-27', s, undefined).slots).toHaveLength(11); // 日
     expect(scheduleFor('2026-09-27', s, undefined).open).toBe(true); // 日
   });
   it('臨時休診與只開部分時段', () => {
@@ -54,6 +55,19 @@ describe('看診日與時段', () => {
     expect(scheduleFor('2026-09-29', s, closed).open).toBe(false);
     const partial: DayOverride = { date: '2026-09-29', closed: false, openSlots: ['19:30', '14:30'], note: '' };
     expect(scheduleFor('2026-09-29', s, partial).slots).toEqual(['14:30', '19:30']);
+  });
+  it('平日（週二、三、四）沒有上午時段，週六日有', () => {
+    for (const d of ['2026-09-29', '2026-09-30', '2026-10-01']) {
+      const slots = scheduleFor(d, s, undefined).slots;
+      expect(slots).toHaveLength(6);
+      expect(slots.some((x) => x < '12:00')).toBe(false);
+    }
+    expect(scheduleFor('2026-10-03', s, undefined).slots).toContain('08:30'); // 六
+    expect(scheduleFor('2026-09-27', s, undefined).slots).toContain('08:30'); // 日
+  });
+  it('平日可以臨時多開上午', () => {
+    const extra: DayOverride = { date: '2026-09-29', closed: false, openSlots: ['08:30', '14:30'], note: '' };
+    expect(scheduleFor('2026-09-29', s, extra).slots).toEqual(['08:30', '14:30']);
   });
   it('休診的星期一可以特別開診', () => {
     const special: DayOverride = { date: '2026-09-28', closed: false, openSlots: null, note: '' };
@@ -92,6 +106,8 @@ describe('病人可預約時段', () => {
     expect(slots).toEqual(['16:30', '17:10', '20:10']);
   });
   it('看診前 30 分鐘內不能預約', () => {
+    // 這個測試只看預約時限，所以讓週二也開上午
+    const s = { ...DEFAULT_SETTINGS, weekdaySlots: {} };
     // 台灣時間 08:05 → 08:30 只剩 25 分鐘，不能約；09:10 可以
     const early = new Date('2026-09-29T00:05:00Z');
     expect(patientAvailableSlots('2026-09-29', s, undefined, new Set(), early).slice(0, 2)).toEqual(['09:10', '09:50']);

@@ -61,7 +61,7 @@ export function validateOnlineBooking(
   settings: ClinicSettings,
   override: DayOverride | undefined,
   now: Date = new Date(),
-): Exclude<BookResult, 'ok' | 'slot_taken' | 'already_booked_that_day' | 'too_many'> | null {
+): Exclude<BookResult, 'ok' | 'slot_taken' | 'too_many'> | null {
   const name = input.name.trim();
   if (!name || [...name].length > 30) return 'invalid_name';
   if (!isMobile(normalizePhone(input.phone))) return 'invalid_phone';

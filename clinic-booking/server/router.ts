@@ -101,13 +101,12 @@ const PUBLIC_ROUTES: Record<string, Route> = {
     const phone = normalizePhone(input.phone);
     const now = new Date().toISOString();
     const today = todayInTaipei();
-    // 一個指令同時檢查「時段沒人、這支手機的同一位病人當天沒約、線上預約未超過上限」再寫入，
+    // 一個指令同時檢查「時段沒人、線上預約未超過上限」再寫入，
     // 資料庫一次只處理一個寫入，所以兩人同時搶位只會有一人成功。
     const insert = env.DB.prepare(
       `INSERT INTO bookings (id, date, slot, name, phone, note, status, is_extra, source, cancel_token, created_at, updated_at)
        SELECT ?1, ?2, ?3, ?4, ?5, '', 'booked', 0, 'online', ?6, ?7, ?7
        WHERE NOT EXISTS (SELECT 1 FROM bookings WHERE date = ?2 AND slot = ?3 AND status = 'booked')
-         AND NOT EXISTS (SELECT 1 FROM bookings WHERE date = ?2 AND phone = ?5 AND name = ?4 AND status = 'booked')
          AND (SELECT COUNT(*) FROM bookings
               WHERE phone = ?5 AND status = 'booked' AND source = 'online' AND date >= ?8) < ?9`,
     ).bind(crypto.randomUUID(), input.date, input.slot, input.name, phone, randomToken(16), now, today, settings.maxOnlinePerPhone);
@@ -124,13 +123,11 @@ const PUBLIC_ROUTES: Record<string, Route> = {
 
     // 沒寫入：找出原因
     const reason = await env.DB.prepare(
-      `SELECT
-         EXISTS (SELECT 1 FROM bookings WHERE date = ?1 AND slot = ?2 AND status = 'booked') AS taken,
-         EXISTS (SELECT 1 FROM bookings WHERE date = ?1 AND phone = ?3 AND name = ?4 AND status = 'booked') AS same_day`,
+      `SELECT EXISTS (SELECT 1 FROM bookings WHERE date = ?1 AND slot = ?2 AND status = 'booked') AS taken`,
     )
-      .bind(input.date, input.slot, phone, input.name)
-      .first<{ taken: number; same_day: number }>();
-    const result: BookResult = reason?.taken ? 'slot_taken' : reason?.same_day ? 'already_booked_that_day' : 'too_many';
+      .bind(input.date, input.slot)
+      .first<{ taken: number }>();
+    const result: BookResult = reason?.taken ? 'slot_taken' : 'too_many';
     return json({ result });
   },
 
