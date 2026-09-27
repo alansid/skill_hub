@@ -9,7 +9,7 @@ import type {
   MyBooking,
 } from '../data/types';
 import { addDays, todayInTaipei } from './dates';
-import { isMobile, maskName, normalizePhone } from './phone';
+import { isBookingPhone, maskName, normalizePhone } from './phone';
 import { bookingRange, patientAvailableSlots, scheduleFor, slotStart } from './schedule';
 
 type ActiveSlot = Pick<Booking, 'date' | 'slot'>;
@@ -64,7 +64,7 @@ export function validateOnlineBooking(
 ): Exclude<BookResult, 'ok' | 'slot_taken' | 'too_many'> | null {
   const name = input.name.trim();
   if (!name || [...name].length > 30) return 'invalid_name';
-  if (!isMobile(normalizePhone(input.phone))) return 'invalid_phone';
+  if (!isBookingPhone(normalizePhone(input.phone))) return 'invalid_phone';
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date) || !/^\d{2}:\d{2}$/.test(input.slot)) return 'slot_unavailable';
   const range = bookingRange(settings, now);
   if (input.date > range.to) return 'too_far';

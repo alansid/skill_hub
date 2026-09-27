@@ -19,6 +19,11 @@ export function isMobile(digits: string): boolean {
   return /^09\d{8}$/.test(digits);
 }
 
+/** 客人可以用來預約的號碼：09 開頭的手機，或 02 開頭的市話（都是 10 碼） */
+export function isBookingPhone(digits: string): boolean {
+  return isMobile(digits) || /^02\d{8}$/.test(digits);
+}
+
 /** 姓名遮蔽：王小明 → 王○明；王明 → 王○（與資料庫 mask_name 相同） */
 export function maskName(name: string): string {
   const chars = [...name];

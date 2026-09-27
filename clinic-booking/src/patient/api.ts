@@ -3,7 +3,7 @@ import { load, save } from '../data/demoApi';
 import { request } from '../data/http';
 import type { BookResult, CancelResult, DayAvailability, MyBooking, PatientApi } from '../data/types';
 import { todayInTaipei } from '../lib/dates';
-import { normalizePhone, isMobile } from '../lib/phone';
+import { normalizePhone, isBookingPhone } from '../lib/phone';
 import { bookingConfig, canPatientCancel, computeAvailability, myBookingsView, validateOnlineBooking } from '../lib/rules';
 import { DEFAULT_SETTINGS } from '../lib/schedule';
 
@@ -78,7 +78,7 @@ function createDemoPatientApi(): PatientApi {
     },
     async findMyBookings(phone) {
       const digits = normalizePhone(phone);
-      if (!isMobile(digits)) throw new Error('請輸入正確的手機號碼（09 開頭，共 10 碼）。');
+      if (!isBookingPhone(digits)) throw new Error('請輸入正確的電話號碼（手機 09 開頭或市話 02 開頭，共 10 碼）。');
       return myBookingsView(
         load().bookings.filter((b) => b.phone === digits),
         settings,

@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { askConfirm } from '../lib/askConfirm';
 import { formatGregorian, weekdayName } from '../lib/dates';
 import { formatLunar } from '../lib/lunar';
-import { isMobile, normalizePhone } from '../lib/phone';
+import { isBookingPhone, normalizePhone } from '../lib/phone';
 import { patientApi, type CancelResult, type MyBooking } from './api';
 
 const CANCEL_ERROR: Record<Exclude<CancelResult, 'ok'>, string> = {
@@ -45,7 +45,7 @@ export function MyBookings({
     e.preventDefault();
     const digits = normalizePhone(phone);
     setMessage('');
-    if (!isMobile(digits)) return setError('請輸入正確的手機號碼（09 開頭，共 10 碼）。');
+    if (!isBookingPhone(digits)) return setError('請輸入正確的電話號碼（手機 09 開頭或市話 02 開頭，共 10 碼）。');
     void lookup(digits);
   }
 
@@ -85,9 +85,9 @@ export function MyBookings({
             setPhone(e.target.value);
             setError('');
           }}
-          placeholder="請輸入預約時填的手機號碼"
+          placeholder="請輸入預約時填的電話號碼"
           autoComplete="tel"
-          aria-label="手機號碼"
+          aria-label="電話號碼"
         />
         <button className="primary" type="submit" disabled={busy}>
           查詢
@@ -96,7 +96,7 @@ export function MyBookings({
       {message && <p className="ok-msg">{message}</p>}
       {error && <p className="error">{error}</p>}
       {list && list.length === 0 && (
-        <p className="p-muted">這支手機目前沒有預約。</p>
+        <p className="p-muted">這個號碼目前沒有預約。</p>
       )}
       {list && list.length > 0 && (
         <ul className="my-list">

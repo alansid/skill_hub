@@ -3,7 +3,7 @@ import { api } from '../data';
 import type { Booking, BookingPatch, ClinicSettings } from '../data/types';
 import { SlotTakenError } from '../data/types';
 import { isValidDate, weekdayName } from '../lib/dates';
-import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
+import { formatPhone, isBookingPhone, normalizePhone } from '../lib/phone';
 import { normalizeTime } from '../lib/schedule';
 import { askConfirm } from '../lib/askConfirm';
 import { Modal } from './Modal';
@@ -190,7 +190,7 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
             onChange={(e) => setPhone(e.target.value)}
             placeholder="0912-345-678"
           />
-          {phoneDigits && !isMobile(phoneDigits) && <small className="warn-text">這不是 09 開頭的手機號碼，請再確認一次</small>}
+          {phoneDigits && !isBookingPhone(phoneDigits) && <small className="warn-text">這不是 09 開頭的手機或 02 開頭的市話，請再確認一次</small>}
         </label>
         <label>
           備註

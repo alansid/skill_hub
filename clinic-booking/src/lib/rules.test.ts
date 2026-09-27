@@ -29,9 +29,10 @@ const booking = (over: Partial<Booking>): Booking => ({
 describe('病人預約規則（網頁與雲端共用）', () => {
   const ok = { date: '2026-09-30', slot: '08:30', name: '王小明', phone: '0912-345-678' };
   it('正常資料可以預約', () => expect(validateOnlineBooking(ok, s, undefined, now)).toBeNull());
+  it('02 市話也可以預約', () => expect(validateOnlineBooking({ ...ok, phone: '02-2302-2457' }, s, undefined, now)).toBeNull());
   it('擋下錯誤資料與不能約的時間', () => {
     expect(validateOnlineBooking({ ...ok, name: '  ' }, s, undefined, now)).toBe('invalid_name');
-    expect(validateOnlineBooking({ ...ok, phone: '0223022457' }, s, undefined, now)).toBe('invalid_phone');
+    expect(validateOnlineBooking({ ...ok, phone: '0423022457' }, s, undefined, now)).toBe('invalid_phone');
     expect(validateOnlineBooking({ ...ok, date: '2026-10-02' }, s, undefined, now)).toBe('slot_unavailable'); // 週五
     expect(validateOnlineBooking({ ...ok, slot: '08:31' }, s, undefined, now)).toBe('slot_unavailable');
     expect(validateOnlineBooking({ ...ok, date: '2027-01-30' }, s, undefined, now)).toBe('too_far');

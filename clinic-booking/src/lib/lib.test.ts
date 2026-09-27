@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, formatGregorian, todayInTaipei, weekdayName } from './dates';
 import { formatLunar } from './lunar';
-import { formatPhone, maskName, normalizePhone } from './phone';
+import { formatPhone, isBookingPhone, maskName, normalizePhone } from './phone';
 import {
   DEFAULT_SETTINGS,
   bookingRange,
@@ -38,6 +38,13 @@ describe('電話', () => {
     expect(normalizePhone('0912-345 678')).toBe('0912345678');
     expect(formatPhone('0912345678')).toBe('0912-345-678');
     expect(formatPhone('0223022457')).toBe('02-2302-2457');
+  });
+  it('可以用手機或 02 市話預約', () => {
+    expect(isBookingPhone('0912345678')).toBe(true);
+    expect(isBookingPhone(normalizePhone('(02) 2302-2457'))).toBe(true);
+    expect(isBookingPhone('023022457')).toBe(false); // 少一碼
+    expect(isBookingPhone('0423022457')).toBe(false); // 其他區碼
+    expect(isBookingPhone('23022457')).toBe(false); // 沒有區碼
   });
 });
 

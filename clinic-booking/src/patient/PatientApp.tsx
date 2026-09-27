@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { addDays, formatGregorian, weekdayName, weekdayOf, weekdayShort } from '../lib/dates';
 import { formatLunar, lunarOf } from '../lib/lunar';
-import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
+import { formatPhone, isBookingPhone, normalizePhone } from '../lib/phone';
 import { periodOf, type Period } from '../lib/schedule';
 import { patientApi, type BookResult, type BookingConfig, type DayAvailability } from './api';
 import { MyBookings } from './MyBookings';
@@ -10,12 +10,12 @@ import { canDial } from '../lib/dial';
 
 const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
   invalid_name: '請填寫姓名。',
-  invalid_phone: '請填寫正確的手機號碼（09 開頭，共 10 碼）。',
+  invalid_phone: '請填寫正確的電話號碼（手機 09 開頭或市話 02 開頭，共 10 碼）。',
   slot_unavailable: '這個時段目前無法預約，請選擇其他時段。',
   too_far: '這個日期超過可預約的範圍，請選擇較近的日期。',
   too_late: '這個時段已經過了或即將開始，請選擇其他時段。',
   slot_taken: '很抱歉，這個時段剛剛被預約走了，請選擇其他時段。',
-  too_many: '這支手機已經有多筆還沒到的預約。如需再預約，請來電。',
+  too_many: '這個號碼已經有多筆還沒到的預約。如需再預約，請來電。',
 };
 
 const PERIODS: Period[] = ['上午', '下午', '晚上'];
@@ -121,7 +121,7 @@ export function PatientApp() {
     if (!date || !slot) return;
     const digits = normalizePhone(phone);
     if (!name.trim()) return setError(ERROR_TEXT.invalid_name);
-    if (!isMobile(digits)) return setError(ERROR_TEXT.invalid_phone);
+    if (!isBookingPhone(digits)) return setError(ERROR_TEXT.invalid_phone);
     setBusy(true);
     setError('');
     try {
@@ -212,12 +212,12 @@ export function PatientApp() {
             <dd className="big">{done.slot}</dd>
             <dt>姓名</dt>
             <dd>{done.name}</dd>
-            <dt>手機</dt>
+            <dt>電話</dt>
             <dd>{formatPhone(done.phone)}</dd>
           </dl>
           {notice}
           <p className="p-muted">
-            建議將此畫面截圖保存。如需取消，請點上方「查詢／取消預約」，輸入手機號碼即可；或來電{' '}
+            建議將此畫面截圖保存。如需取消，請點上方「查詢／取消預約」，輸入電話號碼即可；或來電{' '}
             {phoneLink}。
           </p>
           <div className="success-actions">
@@ -359,7 +359,7 @@ export function PatientApp() {
                   />
                 </label>
                 <label>
-                  手機
+                  電話（手機或 02 市話）
                   <input
                     type="tel"
                     inputMode="tel"
@@ -369,7 +369,7 @@ export function PatientApp() {
                       setError('');
                     }}
                     autoComplete="tel"
-                    placeholder="0912345678"
+                    placeholder="0912345678 或 0223022457"
                     required
                   />
                 </label>

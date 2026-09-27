@@ -1,6 +1,6 @@
 import type { BookResult, CancelResult, DayOverride } from '../src/data/types';
 import { addDays, todayInTaipei } from '../src/lib/dates';
-import { normalizePhone, isMobile } from '../src/lib/phone';
+import { normalizePhone, isBookingPhone } from '../src/lib/phone';
 import { bookingConfig, canPatientCancel, computeAvailability, myBookingsView, validateOnlineBooking } from '../src/lib/rules';
 import {
   BOOKING_COLUMNS,
@@ -134,7 +134,7 @@ const PUBLIC_ROUTES: Record<string, Route> = {
   'POST /api/public/my-bookings': async (req, env) => {
     const body = await readJson<{ phone?: unknown }>(req);
     const phone = normalizePhone(String(body.phone ?? ''));
-    if (!isMobile(phone)) throw new HttpError(400, 'invalid_phone', '請輸入正確的手機號碼（09 開頭，共 10 碼）。');
+    if (!isBookingPhone(phone)) throw new HttpError(400, 'invalid_phone', '請輸入正確的電話號碼（手機 09 開頭或市話 02 開頭，共 10 碼）。');
     await limitLookups(req, env);
     const settings = await getSettings(env.DB);
     const { results } = await env.DB.prepare(
@@ -153,7 +153,7 @@ const PUBLIC_ROUTES: Record<string, Route> = {
       .bind(id, phone)
       .first<BookingRow>();
     let result: CancelResult;
-    if (!row || !isMobile(phone)) result = 'not_found';
+    if (!row || !isBookingPhone(phone)) result = 'not_found';
     else if (row.status !== 'booked') result = 'already_cancelled';
     else if (!canPatientCancel(toBooking(row), await getSettings(env.DB))) result = 'too_late';
     else {

@@ -42,7 +42,7 @@ export function SearchPage({ onOpenDate }: { onOpenDate: (date: string) => void 
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="姓名或手機後 3 碼"
+          placeholder="姓名或電話後 3 碼"
           autoFocus
         />
         <button className="primary" type="submit" disabled={busy}>
