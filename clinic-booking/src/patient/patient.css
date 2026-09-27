@@ -139,3 +139,4 @@
   /* 成功畫面、查詢頁不需要那麼寬 */
   .success, .patient > .p-card { max-width: 640px; margin-left: auto; margin-right: auto; }
 }
+.p-footer .app-version { padding: 0.25rem 0 0; }

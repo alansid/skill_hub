@@ -7,6 +7,7 @@ import { DayPage } from './DayPage';
 import { LoginPage } from './LoginPage';
 import { SearchPage } from './SearchPage';
 import { askConfirm, showMessage } from '../lib/askConfirm';
+import { APP_VERSION } from '../version';
 import { exportCsv } from './exportCsv';
 
 type View = 'day' | 'search';
@@ -87,6 +88,7 @@ export function AdminApp() {
           />
         )}
       </main>
+      <footer className="app-version">{APP_VERSION}</footer>
     </div>
   );
 }

@@ -379,3 +379,5 @@ a.icon-btn { font-size: 1.15rem; }
   .result { grid-template-columns: 15rem 12rem 12rem 1fr; }
   .result .note { grid-column: auto; }
 }
+
+.app-version { text-align: center; color: var(--ink-3); font-size: 0.75rem; padding: 1.5rem 0 1rem; }

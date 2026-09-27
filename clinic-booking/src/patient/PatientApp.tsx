@@ -5,6 +5,7 @@ import { formatPhone, isMobile, normalizePhone } from '../lib/phone';
 import { periodOf, type Period } from '../lib/schedule';
 import { patientApi, type BookResult, type BookingConfig, type DayAvailability } from './api';
 import { MyBookings } from './MyBookings';
+import { APP_VERSION } from '../version';
 import { canDial } from '../lib/dial';
 
 const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
@@ -387,6 +388,7 @@ export function PatientApp() {
       )}
       <footer className="p-footer">
         {config?.clinicName ?? '任老師'}・電話 {phoneLink}
+        <div className="app-version">{APP_VERSION}</div>
       </footer>
     </div>
   );
