@@ -10,7 +10,7 @@ import { canDial } from '../lib/dial';
 
 const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
   invalid_name: '請填寫姓名。',
-  invalid_phone: '請填寫正確的電話號碼（手機 09 開頭或市話 02 開頭，共 10 碼）。',
+  invalid_phone: '請填寫正確的電話號碼（手機，或市話加區碼）。',
   slot_unavailable: '這個時段目前無法預約，請選擇其他時段。',
   too_far: '這個日期超過可預約的範圍，請選擇較近的日期。',
   too_late: '這個時段已經過了或即將開始，請選擇其他時段。',
@@ -359,7 +359,7 @@ export function PatientApp() {
                   />
                 </label>
                 <label>
-                  電話（手機或 02 市話）
+                  電話（手機或市話，市話請加區碼）
                   <input
                     type="tel"
                     inputMode="tel"
@@ -369,7 +369,7 @@ export function PatientApp() {
                       setError('');
                     }}
                     autoComplete="tel"
-                    placeholder="0912345678 或 0223022457"
+                    placeholder="例如 0912345678、02-23022457"
                     required
                   />
                 </label>

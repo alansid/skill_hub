@@ -134,7 +134,7 @@ const PUBLIC_ROUTES: Record<string, Route> = {
   'POST /api/public/my-bookings': async (req, env) => {
     const body = await readJson<{ phone?: unknown }>(req);
     const phone = normalizePhone(String(body.phone ?? ''));
-    if (!isBookingPhone(phone)) throw new HttpError(400, 'invalid_phone', '請輸入正確的電話號碼（手機 09 開頭或市話 02 開頭，共 10 碼）。');
+    if (!isBookingPhone(phone)) throw new HttpError(400, 'invalid_phone', '請輸入正確的電話號碼（手機，或市話加區碼）。');
     await limitLookups(req, env);
     const settings = await getSettings(env.DB);
     const { results } = await env.DB.prepare(

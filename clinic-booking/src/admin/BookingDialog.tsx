@@ -190,7 +190,7 @@ export function BookingDialog({ target, settings, onClose, onSaved }: Props) {
             onChange={(e) => setPhone(e.target.value)}
             placeholder="0912-345-678"
           />
-          {phoneDigits && !isBookingPhone(phoneDigits) && <small className="warn-text">這不是 09 開頭的手機或 02 開頭的市話，請再確認一次</small>}
+          {phoneDigits && !isBookingPhone(phoneDigits) && <small className="warn-text">這不像台灣的手機或市話號碼（市話要加區碼），請再確認一次</small>}
         </label>
         <label>
           備註

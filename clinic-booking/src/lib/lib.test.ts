@@ -39,12 +39,23 @@ describe('電話', () => {
     expect(formatPhone('0912345678')).toBe('0912-345-678');
     expect(formatPhone('0223022457')).toBe('02-2302-2457');
   });
-  it('可以用手機或 02 市話預約', () => {
+  it('可以用台灣的手機或任何區碼的市話預約', () => {
     expect(isBookingPhone('0912345678')).toBe(true);
     expect(isBookingPhone(normalizePhone('(02) 2302-2457'))).toBe(true);
-    expect(isBookingPhone('023022457')).toBe(false); // 少一碼
-    expect(isBookingPhone('0423022457')).toBe(false); // 其他區碼
+    expect(isBookingPhone('0423456789')).toBe(true); // 台中
+    expect(isBookingPhone('031234567')).toBe(true); // 新竹 9 碼
     expect(isBookingPhone('23022457')).toBe(false); // 沒有區碼
+    expect(isBookingPhone('02230224571')).toBe(false); // 多一碼
+    expect(isBookingPhone('12345678901')).toBe(false);
+  });
+  it('各地市話加分隔線', () => {
+    expect(formatPhone('031234567')).toBe('03-123-4567');
+    expect(formatPhone('0423456789')).toBe('04-2345-6789');
+    expect(formatPhone('0492223333')).toBe('049-222-3333');
+    expect(formatPhone('089123456')).toBe('089-123456');
+    expect(formatPhone('082312345')).toBe('082-312345');
+    expect(formatPhone('083622345')).toBe('0836-22345');
+    expect(formatPhone('12345')).toBe('12345');
   });
 });
 

@@ -78,7 +78,7 @@ function createDemoPatientApi(): PatientApi {
     },
     async findMyBookings(phone) {
       const digits = normalizePhone(phone);
-      if (!isBookingPhone(digits)) throw new Error('請輸入正確的電話號碼（手機 09 開頭或市話 02 開頭，共 10 碼）。');
+      if (!isBookingPhone(digits)) throw new Error('請輸入正確的電話號碼（手機，或市話加區碼）。');
       return myBookingsView(
         load().bookings.filter((b) => b.phone === digits),
         settings,

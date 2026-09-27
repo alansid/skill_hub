@@ -45,7 +45,7 @@ export function MyBookings({
     e.preventDefault();
     const digits = normalizePhone(phone);
     setMessage('');
-    if (!isBookingPhone(digits)) return setError('請輸入正確的電話號碼（手機 09 開頭或市話 02 開頭，共 10 碼）。');
+    if (!isBookingPhone(digits)) return setError('請輸入正確的電話號碼（手機，或市話加區碼）。');
     void lookup(digits);
   }
 
