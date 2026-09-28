@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS: ClinicSettings = {
   openWeekdays: DEFAULT_OPEN_WEEKDAYS,
   slots: DEFAULT_SLOTS,
   weekdaySlots: DEFAULT_WEEKDAY_SLOTS,
-  bookingWindowDays: 90,
+  bookingWindowDays: 365,
   sameDayBooking: true,
   minMinutesBeforeBooking: 30,
   minHoursBeforeCancel: 0,

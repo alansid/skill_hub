@@ -132,9 +132,9 @@ describe('病人可預約時段', () => {
     // 07:59 → 08:30 還有 31 分鐘，可以約
     expect(patientAvailableSlots('2026-09-29', s, undefined, new Set(), new Date('2026-09-28T23:59:00Z'))[0]).toBe('08:30');
   });
-  it('超過 90 天或休診日沒有時段', () => {
-    expect(bookingRange(s, now)).toEqual({ from: '2026-09-29', to: '2026-12-28' });
-    expect(patientAvailableSlots('2026-12-29', s, undefined, new Set(), now)).toEqual([]);
+  it('超過一年或休診日沒有時段', () => {
+    expect(bookingRange(s, now)).toEqual({ from: '2026-09-29', to: '2027-09-29' });
+    expect(patientAvailableSlots('2027-09-30', s, undefined, new Set(), now)).toEqual([]);
     expect(patientAvailableSlots('2026-09-28', s, undefined, new Set(), now)).toEqual([]);
   });
   it('最晚預約時限（預留功能）', () => {

@@ -35,7 +35,7 @@ describe('病人預約規則（網頁與雲端共用）', () => {
     expect(validateOnlineBooking({ ...ok, phone: '23022457' }, s, undefined, now)).toBe('invalid_phone');
     expect(validateOnlineBooking({ ...ok, date: '2026-10-02' }, s, undefined, now)).toBe('slot_unavailable'); // 週五
     expect(validateOnlineBooking({ ...ok, slot: '08:31' }, s, undefined, now)).toBe('slot_unavailable');
-    expect(validateOnlineBooking({ ...ok, date: '2027-01-30' }, s, undefined, now)).toBe('too_far');
+    expect(validateOnlineBooking({ ...ok, date: '2027-09-30' }, s, undefined, now)).toBe('too_far');
     expect(validateOnlineBooking({ ...ok, date: '2026-09-29' }, s, undefined, now)).toBe('too_late'); // 25 分鐘後
     expect(
       validateOnlineBooking(ok, s, { date: '2026-09-30', closed: true, openSlots: null, note: '' }, now),
