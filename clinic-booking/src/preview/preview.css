@@ -1,0 +1,19 @@
+.preview-switch {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--ink);
+}
+.preview-switch button {
+  min-height: 38px;
+  border: none;
+  background: transparent;
+  color: var(--paper);
+  opacity: 0.7;
+}
+.preview-switch button[aria-selected='true'] { background: var(--paper); color: var(--ink); opacity: 1; font-weight: 700; }
+.preview-switch ~ .app .topbar { top: calc(env(safe-area-inset-top, 0px) + 54px); }
