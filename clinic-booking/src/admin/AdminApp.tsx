@@ -6,11 +6,12 @@ import { DEFAULT_SETTINGS } from '../lib/schedule';
 import { DayPage } from './DayPage';
 import { LoginPage } from './LoginPage';
 import { SearchPage } from './SearchPage';
+import { WeekPage } from './WeekPage';
 import { askConfirm, showMessage } from '../lib/askConfirm';
 import { APP_VERSION } from '../version';
 import { exportCsv } from './exportCsv';
 
-type View = 'day' | 'search';
+type View = 'day' | 'week' | 'search';
 
 export function AdminApp() {
   const [user, setUser] = useState<string | null | undefined>(undefined);
@@ -65,6 +66,12 @@ export function AdminApp() {
             登記本
           </button>
           <button
+            className={view === 'week' ? 'active' : ''}
+            onClick={() => setView('week')}
+          >
+            一週
+          </button>
+          <button
             className={view === 'search' ? 'active' : ''}
             onClick={() => setView('search')}
           >
@@ -79,6 +86,16 @@ export function AdminApp() {
       <main>
         {view === 'day' ? (
           <DayPage date={date} setDate={setDate} settings={settings} />
+        ) : view === 'week' ? (
+          <WeekPage
+            date={date}
+            setDate={setDate}
+            settings={settings}
+            onOpenDate={(d) => {
+              setDate(d);
+              setView('day');
+            }}
+          />
         ) : (
           <SearchPage
             onOpenDate={(d) => {

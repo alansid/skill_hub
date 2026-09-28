@@ -116,7 +116,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible {
 }
 .brand small { font-size: 0.8rem; color: var(--ink-2); font-weight: 400; }
 .topbar nav { display: flex; gap: 0.3rem; }
-.topbar nav button { padding: 0.35rem 0.6rem; font-size: 0.9rem; }
+.topbar nav button { padding: 0.35rem 0.6rem; font-size: 0.9rem; white-space: nowrap; }
 .topbar nav button.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
 main { padding: 0 16px; }
@@ -315,10 +315,43 @@ a.icon-btn { font-size: 1.15rem; }
 .result-date { font-variant-numeric: tabular-nums; }
 .result.cancelled .name { text-decoration: line-through; color: var(--ink-3); }
 
+/* ---------- 一週 ---------- */
+.week-page .toolbar .meta { margin: 0; }
+.week-day { background: var(--paper-2); border: 1px solid var(--rule); border-radius: var(--radius); margin: 0.75rem 0; overflow: hidden; }
+.week-day-today { border-color: var(--ink-2); }
+.week-day-head, .week-day-closed {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+  font-family: var(--serif);
+  font-weight: 700;
+}
+.week-day-head { border: none; border-bottom: 1px solid var(--rule); border-radius: 0; background: var(--paper); padding: 0.6rem 0.9rem; }
+.week-day-closed { margin: 0.75rem 0; padding: 0.5rem 0.9rem; border: 1px dashed var(--rule); background: transparent; color: var(--ink-3); font-weight: 400; }
+.week-day-status { display: flex; align-items: center; gap: 0.4rem; font-family: var(--sans); font-weight: 400; font-size: 0.9rem; color: var(--ink-2); white-space: nowrap; }
+.week-day .tag { margin-left: 0.4rem; }
+.week-day > .error, .week-day-note { padding: 0 0.9rem; }
+.week-row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr auto;
+  gap: 0.1rem 0.75rem;
+  align-items: baseline;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--rule);
+}
+.week-row:last-child { border-bottom: none; }
+.week-row .time { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.week-row .phone { font-variant-numeric: tabular-nums; }
+.week-row .note { grid-column: 2 / -1; font-size: 0.85rem; color: var(--ink-2); }
+
 /* ---------- 手機 ---------- */
 @media (max-width: 680px) {
   .brand small { display: none; }
-  .topbar nav button { padding: 0.3rem 0.5rem; }
+  .topbar nav button { padding: 0.3rem 0.4rem; }
+  .topbar nav { gap: 0.2rem; }
   .nav-btn span { display: none; }
   .gregorian { font-size: 1.25rem; }
   .weekday { display: block; margin: 0; font-size: 1rem; }
