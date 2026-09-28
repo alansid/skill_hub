@@ -51,7 +51,8 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     if (key === 'POST /api/admin/login') return await login(request, env);
     const admin = ADMIN_ROUTES[key];
     if (admin) {
-      if (!(await isLoggedIn(request, env))) return fail(401, 'unauthorized', '請重新登入。');
+      // 沒有設定 ADMIN_PASSWORD 時，管理頁不用登入（使用者要求）
+      if (env.ADMIN_PASSWORD && !(await isLoggedIn(request, env))) return fail(401, 'unauthorized', '請重新登入。');
       return await admin(request, env, url);
     }
     return fail(404, 'not_found', '找不到這個功能。');
@@ -262,7 +263,7 @@ function checkBookingFields(b: Record<string, unknown>, partial: boolean) {
 }
 
 const ADMIN_ROUTES: Record<string, Route> = {
-  'GET /api/admin/me': async () => json({ user: '管理員' }),
+  'GET /api/admin/me': async (_req, env) => json({ user: '管理員', passwordRequired: !!env.ADMIN_PASSWORD }),
 
   'POST /api/admin/logout': async (req, env) => {
     const token = readCookie(req, SESSION_COOKIE);

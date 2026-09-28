@@ -73,7 +73,7 @@ export function AdminApp() {
           <button onClick={handleExport} disabled={exporting}>
             {exporting ? '匯出中…' : '備份'}
           </button>
-          <button onClick={handleLogout}>登出</button>
+          {api.passwordRequired && <button onClick={handleLogout}>登出</button>}
         </nav>
       </header>
       <main>

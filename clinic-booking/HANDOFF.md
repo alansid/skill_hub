@@ -1,7 +1,7 @@
 # 任老師 預約系統 — 交接說明（給接手的 AI）
 
 > 這份文件是給接手的 AI 助理看的，整理系統現況、業務規則、部署方式與待辦事項。
-> 最後更新：2026-09-27，版本 **beta-0.0.3**。
+> 最後更新：2026-09-28，版本 **1.0.1**。
 
 ## 0. 先讀這裡：與使用者合作的方式
 
@@ -35,7 +35,7 @@
 | 前端 | React 19 + TypeScript + Vite（`src/`），兩個入口：`index.html`（客人）、`admin.html`（管理） |
 | 後端 | Cloudflare Pages Functions：`functions/api/[[path]].ts` → `server/router.ts` |
 | 資料庫 | Cloudflare D1（SQLite），繫結名稱 **`DB`** |
-| 管理密碼 | Pages 的 Secret **`ADMIN_PASSWORD`** |
+| 管理密碼 | Pages 的 Secret **`ADMIN_PASSWORD`**。**沒有設定時管理頁不用登入**（正式站目前就是沒設，使用者要求） |
 | 示範模式 | `npm run dev` 時資料存在瀏覽器 localStorage（`src/data/demoApi.ts`、`src/patient/api.ts`），密碼 `demo1234` |
 
 ### 重要檔案
@@ -86,7 +86,8 @@
 
 ### 管理員
 
-- 登入後 30 天內不用再輸入密碼。連續輸錯 5 次暫停 15 分鐘（依網路位置計算）。
+- **正式站目前沒有管理密碼**：使用者已被告知任何知道網址的人都能看到、修改所有客人資料，仍決定拿掉（2026-09-28）。要加回密碼，只要在 Pages 設定 `ADMIN_PASSWORD` 並重新部署，不用改程式。
+- 有設密碼時：登入後 30 天內不用再輸入密碼。連續輸錯 5 次暫停 15 分鐘（依網路位置計算）。沒設密碼時不顯示「登出」。
 - 管理員登記預約時**只有日期、時間、姓名是必填**，電話可以空白；時間可以不在固定時段上，也不受平日上午不開放的限制。
 - 同一個時段要登記第二人時，要標成「加號」。
 - 管理頁每 10 秒檢查一次資料有沒有更新；畫面在背景時會暫停。
@@ -130,13 +131,13 @@ npx wrangler pages deploy dist --project-name ren-clinic --branch main --commit-
 ```
 
 - 需要環境變數 `CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID`。權杖權限：Account → Cloudflare Pages: Edit、Account → D1: Edit。
-- Pages 專案的 production 設定要有：D1 繫結 `DB`、Secret `ADMIN_PASSWORD`、`compatibility_date` = `2025-09-01`。
-- **改了 `ADMIN_PASSWORD` 之後要重新部署一次才會生效。**
-- 部署後用 API 確認 `GET /accounts/{id}/pages/projects/ren-clinic` 的 `canonical_deployment` 是 production、`success`，而且 `env_vars` 裡有 `ADMIN_PASSWORD`。
+- Pages 專案的 production 設定要有：D1 繫結 `DB`、`compatibility_date` = `2025-09-01`；Secret `ADMIN_PASSWORD` 可有可無（沒有就不用登入）。
+- **改了或刪了 `ADMIN_PASSWORD` 之後要重新部署一次才會生效。** 用 API PATCH `deployment_configs` 時，把值設成 `null` 就是刪除。
+- 部署後用 API 確認 `GET /accounts/{id}/pages/projects/ren-clinic` 的 `canonical_deployment` 是 production、`success`，並確認 `env_vars` 和預期一致。
 
 ### 版號
 
-- 改 `src/version.ts` 的 `APP_VERSION`（格式 `beta-0.0.X`），並用 `npm version 0.0.X-beta --no-git-tag-version` 同步 `package.json`。
+- 改 `src/version.ts` 的 `APP_VERSION`（使用者要求從 `1.0` 開始，之後用 `1.0.X`），並用 `npm version 1.0.X --no-git-tag-version` 同步 `package.json`。
 - 使用者靠頁面最下面的版號確認手機上看到的是不是新版，所以**每次部署有畫面或行為變更時就升一版**。
 
 ### 已知的環境限制（Claude Code 雲端環境）
@@ -148,13 +149,13 @@ npx wrangler pages deploy dist --project-name ren-clinic --branch main --commit-
 
 ## 7. 待辦事項
 
-1. **部署到對方的 Cloudflare 帳號**（使用者預計近期進行）
+1. ~~部署到對方的 Cloudflare 帳號~~：**已完成（2026-09-28）**，網址 `https://ren-clinic-88a.pages.dev/`，D1 `ren-clinic-db`。可預約天數改成 365 天。
    - 使用者把對方的權杖、帳號 ID 設成環境變數後，在新對話進行。
    - 先用 API 確認環境變數指到的是**新帳號**：舊測試帳號裡有 `ren-clinic`、`mrt-food`；如果看到這兩個，就代表還是舊帳號，請停下來問使用者。
    - 步驟：建立 D1 `ren-clinic-db`（`primary_location_hint: apac`）→ 建立 Pages 專案 `ren-clinic`（名稱被佔用時網址會不同）→ 接上 `DB` → 設 `ADMIN_PASSWORD`（新密碼和使用者確認）→ 部署 → 實測 → 把網址和密碼告訴使用者。
    - 舊測試站的資料**不用搬**。
 2. ~~`maxOnlinePerPhone` 預設值~~：已在程式改成 9999（不限制）。
-3. **匯入手寫預約本**：使用者要把手寫資料（今天以後的預約）匯入新站。
+3. **匯入手寫預約本**：9/29 ~ 12/31 已匯入新站（共 261 筆，照片逐頁與使用者核對）。之後的頁面用同樣方式處理。
    - 使用者會在對話裡貼上 CSV（`date,time,name,phone,notes`）。已在舊測試站匯入過 15 筆，做法：每筆用 D1 API 執行 `INSERT ... SELECT`，同時段已有非加號預約就自動設 `is_extra = 1`，並用 `WHERE NOT EXISTS`（同日同時段同名、`source='admin'`）防止重複匯入；最後執行 `UPDATE meta SET value = value + 1 WHERE key = 'version'` 通知管理頁更新。匯入前先用 Python sqlite3 載入 `server/schema.ts` 的資料表定義，做一次模擬。
    - 另一種做法：使用者拍照 → AI 整理成表格（日期、時間、姓名、電話、備註）→ **使用者核對**（特別是電話）→ 用管理 API 或 D1 批次寫入，`source = 'admin'`。
    - 有些預約**沒留電話**：可以匯入，電話留空即可（客人就無法自己上網查詢或取消）。

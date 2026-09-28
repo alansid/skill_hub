@@ -70,6 +70,7 @@ export function createDemoApi(): AdminApi {
 
   return {
     mode: 'demo',
+    passwordRequired: true,
     async currentUser() {
       return getItem(USER_KEY);
     },

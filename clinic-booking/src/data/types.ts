@@ -80,6 +80,8 @@ export interface AdminApi {
   readonly mode: 'demo' | 'cloud';
   /** 已登入回傳顯示名稱，未登入回傳 null */
   currentUser(): Promise<string | null>;
+  /** 需要密碼才能進管理頁（currentUser 之後才準確）；不需要時不顯示「登出」 */
+  readonly passwordRequired: boolean;
   signIn(password: string): Promise<void>;
   signOut(): Promise<void>;
 

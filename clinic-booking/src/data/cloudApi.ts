@@ -11,11 +11,16 @@ function rethrow(e: unknown): never {
 }
 
 export function createCloudApi(): AdminApi {
+  let passwordRequired = true;
   return {
     mode: 'cloud',
+    get passwordRequired() {
+      return passwordRequired;
+    },
     async currentUser() {
       try {
-        const r = await request<{ user: string | null }>('GET', '/api/admin/me');
+        const r = await request<{ user: string | null; passwordRequired?: boolean }>('GET', '/api/admin/me');
+        passwordRequired = r.passwordRequired !== false;
         return r.user;
       } catch (e) {
         if (e instanceof ApiError && e.status === 401) return null;
