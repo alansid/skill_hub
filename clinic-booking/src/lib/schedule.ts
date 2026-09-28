@@ -28,7 +28,8 @@ export const DEFAULT_SETTINGS: ClinicSettings = {
   sameDayBooking: true,
   minMinutesBeforeBooking: 30,
   minHoursBeforeCancel: 0,
-  maxOnlinePerPhone: 3,
+  /** 使用者要求一支電話不限筆數；9999 等於不限制 */
+  maxOnlinePerPhone: 9999,
 };
 
 export type Period = '上午' | '下午' | '晚上';

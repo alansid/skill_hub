@@ -81,8 +81,7 @@
 - 可預約今天起 90 天內；看診前 30 分鐘內不能線上預約。
 - 電話：**台灣的手機或任何區碼的市話**，規則是 `0` 開頭、含區碼共 9～10 碼（`/^0\d{8,9}$/`）。
 - **同一支電話同一天可以約多個時段**，不管姓名。「同一天只能約一個」的限制已經拿掉。
-- 每支電話最多幾筆「還沒到的線上預約」，由設定 `maxOnlinePerPhone` 決定。
-  - ⚠ 測試站的資料庫已設成 `9999`（等於不限制），但**程式預設值仍是 3**。部署到新帳號後會變回 3，見第 7 節。
+- 每支電話最多幾筆「還沒到的線上預約」，由設定 `maxOnlinePerPhone` 決定，**程式預設值是 `9999`（等於不限制）**，新帳號部署後不用另外設定。
 - 客人可以用電話查詢、取消自己的預約；姓名會遮蔽（王○明）。同一個網路位置一小時最多查詢 30 次。
 
 ### 管理員
@@ -151,18 +150,20 @@ npx wrangler pages deploy dist --project-name ren-clinic --branch main --commit-
 
 1. **部署到對方的 Cloudflare 帳號**（使用者預計近期進行）
    - 使用者把對方的權杖、帳號 ID 設成環境變數後，在新對話進行。
+   - 先用 API 確認環境變數指到的是**新帳號**：舊測試帳號裡有 `ren-clinic`、`mrt-food`；如果看到這兩個，就代表還是舊帳號，請停下來問使用者。
    - 步驟：建立 D1 `ren-clinic-db`（`primary_location_hint: apac`）→ 建立 Pages 專案 `ren-clinic`（名稱被佔用時網址會不同）→ 接上 `DB` → 設 `ADMIN_PASSWORD`（新密碼和使用者確認）→ 部署 → 實測 → 把網址和密碼告訴使用者。
    - 舊測試站的資料**不用搬**。
-2. **決定 `maxOnlinePerPhone` 的預設值**：已經問過使用者，要不要在程式裡改成不限制，**還沒得到答覆**。如果不改，新帳號部署後要另外在資料庫設定：
-   `UPDATE settings SET data = json_set(data, '$.maxOnlinePerPhone', 9999) WHERE id = 1;`
+2. ~~`maxOnlinePerPhone` 預設值~~：已在程式改成 9999（不限制）。
 3. **匯入手寫預約本**：使用者要把手寫資料（今天以後的預約）匯入新站。
-   - 預計做法：使用者拍照 → AI 整理成表格（日期、時間、姓名、電話、備註）→ **使用者核對**（特別是電話）→ 用管理 API 或 D1 批次寫入，`source = 'admin'`。
+   - 使用者會在對話裡貼上 CSV（`date,time,name,phone,notes`）。已在舊測試站匯入過 15 筆，做法：每筆用 D1 API 執行 `INSERT ... SELECT`，同時段已有非加號預約就自動設 `is_extra = 1`，並用 `WHERE NOT EXISTS`（同日同時段同名、`source='admin'`）防止重複匯入；最後執行 `UPDATE meta SET value = value + 1 WHERE key = 'version'` 通知管理頁更新。匯入前先用 Python sqlite3 載入 `server/schema.ts` 的資料表定義，做一次模擬。
+   - 另一種做法：使用者拍照 → AI 整理成表格（日期、時間、姓名、電話、備註）→ **使用者核對**（特別是電話）→ 用管理 API 或 D1 批次寫入，`source = 'admin'`。
    - 有些預約**沒留電話**：可以匯入，電話留空即可（客人就無法自己上網查詢或取消）。
    - 沒寫姓名的預約，先填「（未留姓名）」，再請使用者確認。
    - 同一個時段有兩人時，第二位設 `is_extra = 1`；時間不在固定時段上也照實登記。
    - 匯入前先在本機模擬跑一次。
-4. 舊測試站（使用者帳號裡的 `ren-clinic` 與 `ren-clinic-db`）要不要刪除，使用者還沒明確決定；**沒有明確指示前不要刪**。
-5. 分支整理：`claude/stoic-bohr-mfm59z` 要不要合併回 `claude/chinese-medicine-booking-site-kbod8t`，或開 PR 到 main，還沒決定。
+4. 舊測試站的資料庫裡有 15 筆從紙本匯入的真實預約，其中 2 筆因為時段被測試預約佔住而成為加號。新站匯入時不會有這個問題。
+5. 舊測試站（使用者帳號裡的 `ren-clinic` 與 `ren-clinic-db`）要不要刪除，使用者還沒明確決定；**沒有明確指示前不要刪**。
+6. 分支整理：`claude/stoic-bohr-mfm59z` 要不要合併回 `claude/chinese-medicine-booking-site-kbod8t`，或開 PR 到 main，還沒決定。
 
 ## 8. 已確認的決定（不要再改回來）
 
