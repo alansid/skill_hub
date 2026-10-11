@@ -20,8 +20,6 @@ const ERROR_TEXT: Record<Exclude<BookResult, 'ok'>, string> = {
 
 const PERIODS: Period[] = ['上午', '下午', '晚上'];
 
-/** 日期區間預設顯示幾天 */
-const DEFAULT_RANGE_DAYS = 30;
 
 interface Done {
   date: string;
@@ -43,10 +41,6 @@ export function PatientApp() {
   const [done, setDone] = useState<Done | null>(null);
   const [view, setView] = useState<'book' | 'mine'>('book');
   const [lookupPhone, setLookupPhone] = useState('');
-  // 病人想約的日期區間（空白 = 不限）
-  const [rangeFrom, setRangeFrom] = useState('');
-  const [rangeTo, setRangeTo] = useState('');
-  const rangeInitialized = useRef(false);
   const slotRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLElement>(null);
 
@@ -54,12 +48,6 @@ export function PatientApp() {
     try {
       const cfg = await patientApi.getConfig();
       setConfig(cfg);
-      // 第一次載入時，日期區間預設為「今天到 30 天後」
-      if (!rangeInitialized.current) {
-        rangeInitialized.current = true;
-        setRangeFrom(cfg.today);
-        setRangeTo(addDays(cfg.today, Math.min(DEFAULT_RANGE_DAYS, cfg.bookingWindowDays)));
-      }
       setDays(await patientApi.getAvailability(cfg.today, addDays(cfg.today, cfg.bookingWindowDays)));
       setLoadError('');
     } catch (e) {
@@ -81,27 +69,7 @@ export function PatientApp() {
   ) : (
     <b className="phone-text">{phoneText}</b>
   );
-  const minDate = config?.today ?? '';
-  const maxDate = config ? addDays(config.today, config.bookingWindowDays) : '';
-  const rangeActive = Boolean(rangeFrom || rangeTo);
-  // 只留下日期區間內的看診日
-  const filteredDays = useMemo(
-    () =>
-      days?.filter((d) => (!rangeFrom || d.date >= rangeFrom) && (!rangeTo || d.date <= rangeTo)) ?? null,
-    [days, rangeFrom, rangeTo],
-  );
   const selectedDay = days?.find((d) => d.date === date) ?? null;
-
-  function changeRange(from: string, to: string) {
-    // 結束日早於開始日時，自動對調
-    if (from && to && to < from) [from, to] = [to, from];
-    setRangeFrom(from);
-    setRangeTo(to);
-    if (date && ((from && date < from) || (to && date > to))) {
-      setDate(null);
-      setSlot(null);
-    }
-  }
 
   function pickDate(d: string) {
     setDate(d);
@@ -243,49 +211,7 @@ export function PatientApp() {
             {loadError && <p className="error">{loadError}</p>}
             {!days && !loadError && <p className="p-muted">載入中…</p>}
             {days && days.length === 0 && <p className="p-muted">目前沒有可預約的日期，請來電預約。</p>}
-            {days && days.length > 0 && (
-              <div className="range">
-                <span className="range-label">想約的日期</span>
-                <div className="range-row">
-                  <input
-                    id="range-from"
-                    type="date"
-                    value={rangeFrom}
-                    min={minDate}
-                    max={maxDate}
-                    onChange={(e) => changeRange(e.target.value, rangeTo)}
-                    aria-label="開始日期"
-                  />
-                  <span>到</span>
-                  <input
-                    id="range-to"
-                    type="date"
-                    value={rangeTo}
-                    min={rangeFrom || minDate}
-                    max={maxDate}
-                    onChange={(e) => changeRange(rangeFrom, e.target.value)}
-                    aria-label="結束日期"
-                  />
-                </div>
-                {rangeTo !== maxDate && (
-                  <button className="link-btn" onClick={() => changeRange(rangeFrom || minDate, maxDate)}>
-                    看更後面的日期（最多到 {Number(maxDate.slice(5, 7))}/{Number(maxDate.slice(8))}）
-                  </button>
-                )}
-              </div>
-            )}
-            {filteredDays && rangeActive && filteredDays.length === 0 && (
-              <p className="p-muted">這段期間沒有營業日，請換一段日期。</p>
-            )}
-            {filteredDays && (
-              <DateGrid
-                key={rangeFrom + rangeTo}
-                days={filteredDays}
-                selected={date}
-                onPick={pickDate}
-                showAllInitially={rangeActive}
-              />
-            )}
+            {days && days.length > 0 && <CalendarGrid days={days} selected={date} onPick={pickDate} />}
             {config && (
               <p className="p-muted small">
                 可預約今天起 {config.bookingWindowDays} 天內的日期；只顯示營業日。
@@ -394,59 +320,82 @@ export function PatientApp() {
   );
 }
 
-function DateGrid({
+/** 星期一開頭的順序 */
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+/** 月曆：一列一週，只列有營業的星期幾；先顯示兩個月 */
+function CalendarGrid({
   days,
   selected,
   onPick,
-  showAllInitially = false,
 }: {
   days: DayAvailability[];
   selected: string | null;
   onPick: (d: string) => void;
-  showAllInitially?: boolean;
 }) {
-  const [showAll, setShowAll] = useState(showAllInitially);
-  const visible = showAll ? days : days.slice(0, 15);
-  const months: { key: string; items: DayAvailability[] }[] = [];
-  for (const d of visible) {
-    const key = d.date.slice(0, 7);
-    const last = months[months.length - 1];
-    if (last?.key === key) last.items.push(d);
-    else months.push({ key, items: [d] });
-  }
+  const [monthCount, setMonthCount] = useState(2);
+  const byDate = useMemo(() => new Map(days.map((d) => [d.date, d])), [days]);
+  const columns = useMemo(() => WEEK_ORDER.filter((w) => days.some((d) => weekdayOf(d.date) === w)), [days]);
+  const monthKeys = useMemo(() => [...new Set(days.map((d) => d.date.slice(0, 7)))], [days]);
+  const first = days[0].date;
+  const last = days[days.length - 1].date;
+  const shown = monthKeys.slice(0, monthCount);
+
   return (
     <>
-      {months.map((m) => (
-        <div key={m.key}>
-          <h3 className="month">
-            {Number(m.key.slice(0, 4))}年{Number(m.key.slice(5))}月
-          </h3>
-          <div className="date-grid">
-            {m.items.map((d) => {
-              const full = d.available.length === 0;
-              const wd = weekdayOf(d.date);
-              return (
-                <button
-                  key={d.date}
-                  className={'date-btn' + (selected === d.date ? ' on' : '') + (full ? ' full' : '')}
-                  disabled={full}
-                  onClick={() => onPick(d.date)}
-                >
-                  <span className="d-day">
-                    {Number(d.date.slice(5, 7))}/{Number(d.date.slice(8))}
-                  </span>
-                  <span className={'d-wd' + (wd === 0 || wd === 6 ? ' weekend' : '')}>週{weekdayShort(wd)}</span>
-                  <span className="d-lunar">{lunarLabel(d.date)}</span>
-                  <span className="d-left">{full ? '額滿' : `剩 ${d.available.length}`}</span>
-                </button>
-              );
-            })}
+      {shown.map((mk) => {
+        const monthStart = `${mk}-01`;
+        const monthEnd = addDays(addDays(monthStart, 32).slice(0, 7) + '-01', -1);
+        const weeks: string[][] = [];
+        for (let ws = addDays(monthStart, -((weekdayOf(monthStart) + 6) % 7)); ws <= monthEnd; ws = addDays(ws, 7)) {
+          const cells = columns.map((w) => addDays(ws, WEEK_ORDER.indexOf(w)));
+          // 整週都在可預約範圍外（例如已經過去）就不顯示
+          if (cells.some((c) => c.startsWith(mk) && c >= first && c <= last)) weeks.push(cells);
+        }
+        return (
+          <div key={mk} className="cal">
+            <h3 className="month">
+              {Number(mk.slice(0, 4))}年{Number(mk.slice(5))}月
+            </h3>
+            <div className="cal-grid" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}>
+              {columns.map((w) => (
+                <span key={w} className={'cal-wd' + (w === 0 || w === 6 ? ' weekend' : '')}>
+                  週{weekdayShort(w)}
+                </span>
+              ))}
+              {weeks.flat().map((c) => {
+                const d = byDate.get(c);
+                if (!c.startsWith(mk) || c < first || c > last) return <span key={c} className="cal-empty" />;
+                if (!d) {
+                  return (
+                    <span key={c} className="date-btn cal-closed">
+                      <span className="d-day">{Number(c.slice(8))}</span>
+                      <span className="d-left">休</span>
+                    </span>
+                  );
+                }
+                const full = d.available.length === 0;
+                return (
+                  <button
+                    key={c}
+                    className={'date-btn' + (selected === c ? ' on' : '') + (full ? ' full' : '')}
+                    disabled={full}
+                    onClick={() => onPick(c)}
+                    aria-label={`${Number(c.slice(5, 7))}月${Number(c.slice(8))}日 ${full ? '額滿' : `剩${d.available.length}個時段`}`}
+                  >
+                    <span className="d-day">{Number(c.slice(8))}</span>
+                    <span className="d-lunar">{lunarLabel(c)}</span>
+                    <span className="d-left">{full ? '額滿' : `剩 ${d.available.length}`}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
-      {!showAll && days.length > visible.length && (
-        <button className="wide more" onClick={() => setShowAll(true)}>
-          顯示更多日期
+        );
+      })}
+      {monthCount < monthKeys.length && (
+        <button className="wide more" onClick={() => setMonthCount((n) => n + 2)}>
+          看更後面的月份
         </button>
       )}
     </>

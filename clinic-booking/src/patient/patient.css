@@ -43,7 +43,10 @@
 .more { margin-top: 0.6rem; }
 
 .month { font-family: var(--serif); font-size: 0.95rem; color: var(--ink-2); margin: 0.8rem 0 0.4rem; }
-.date-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 0.45rem; }
+.cal-grid { display: grid; gap: 0.35rem; }
+.cal-wd { text-align: center; font-size: 0.85rem; color: var(--ink-2); padding: 0.2rem 0; }
+.cal-wd.weekend { color: var(--red); }
+.cal-empty { min-height: 1px; }
 .date-btn {
   display: grid;
   justify-items: center;
@@ -53,14 +56,14 @@
   line-height: 1.25;
 }
 .date-btn .d-day { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.date-btn .d-wd { font-size: 0.85rem; }
-.date-btn .d-wd.weekend { color: var(--red); }
 .date-btn .d-lunar { font-size: 0.72rem; color: var(--ink-3); }
 .date-btn .d-left { font-size: 0.75rem; color: var(--green); }
 .date-btn.full { background: var(--paper); }
 .date-btn.full .d-left { color: var(--ink-3); }
 .date-btn.on { background: var(--red); border-color: var(--red); color: #fff; }
-.date-btn.on .d-wd, .date-btn.on .d-lunar, .date-btn.on .d-left { color: #fff; }
+.date-btn.on .d-lunar, .date-btn.on .d-left { color: #fff; }
+.date-btn.cal-closed { background: transparent; border: 1px dashed var(--rule); color: var(--ink-3); border-radius: 8px; }
+.date-btn.cal-closed .d-left { color: var(--ink-3); }
 
 .slot-row { display: grid; grid-template-columns: 3rem 1fr; gap: 0.5rem; align-items: start; padding: 0.4rem 0; border-top: 1px dashed var(--rule); }
 .slot-row:first-of-type { border-top: none; }
@@ -111,11 +114,6 @@
 .my-list .p-muted.small { margin: 0; }
 .my-list button { flex-shrink: 0; }
 
-.range { display: grid; gap: 0.4rem; margin-bottom: 0.4rem; padding-bottom: 0.6rem; border-bottom: 1px dashed var(--rule); }
-.range-label { font-size: 0.9rem; color: var(--ink-2); }
-.range-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: center; }
-.range-row input { min-width: 0; }
-.link-btn { justify-self: start; border: none; background: none; padding: 0; min-height: 32px; color: var(--red); text-decoration: underline; }
 .phone-text { white-space: nowrap; }
 
 /* ---------- 版面：手機上下排列，電腦左右兩欄滿版 ---------- */
@@ -135,7 +133,7 @@
   .book-layout .p-card { margin: 0 0 1rem; }
   .book-right { position: sticky; top: 1rem; }
   .p-placeholder { display: block; color: var(--ink-2); text-align: center; padding: 3rem 1.5rem; border-style: dashed; }
-  .date-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
+  .cal-grid { gap: 0.45rem; }
   /* 成功畫面、查詢頁不需要那麼寬 */
   .success, .patient > .p-card { max-width: 640px; margin-left: auto; margin-right: auto; }
 }
